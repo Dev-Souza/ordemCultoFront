@@ -1,0 +1,23 @@
+{
+  "name": "ordemculto_front",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-icons/all-files": "^4.1.0",
+    "axios": "^1.7.9",
+    "bootstrap": "^5.3.3",
+    "formik": "^2.4.6",
+    "next": "15.1.2",
+    "react": "^19.0.0",
+    "react-bootstrap": "^2.10.7",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.4.0",
+    "yup": "^1.6.1"
+  }
+}
