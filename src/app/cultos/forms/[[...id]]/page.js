@@ -6,14 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Container, Form, InputGroup, ProgressBar } from "react-bootstrap";
-import { FaCheck, FaAngleLeft, FaTimes, FaClock, FaCalendar, FaAngleRight } from "react-icons/fa";
-import DatePicker, { Calendar } from "react-multi-date-picker";
+import { FaCheck, FaAngleLeft, FaClock, FaCalendar, FaAngleRight } from "react-icons/fa";
+import DatePicker from "react-multi-date-picker";
 
 export default function Page({ params }) {
     const [loading, setLoading] = useState(false); //pagina carregando
     const [error, setError] = useState(null); //login
     const [step, setStep] = useState(1); //próximo form
-    const [formData, setFormData] = useState({}); //form
     const [selectedDates, setSelectedDates] = useState([]); //Multiplas datas
 
     const authToken = localStorage.getItem('authToken');
@@ -29,13 +28,8 @@ export default function Page({ params }) {
         setStep(step - 1);
     };
 
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
-        setFormData({ ...formData, [name]: value });
-    };
-
-    const salvar = (values) => {
-        alert("salvou")
+    const cadastrarCulto = (values) => {
+        console.log(values)
     };
 
     //Sobre a multi seleção de data
@@ -63,24 +57,35 @@ export default function Page({ params }) {
         return <p>Erro ao carregar cultos: {error}</p>;
     }
 
-    // function salvar(values) {
-    //     console.log("Salvando:", values);
-    // }
-
     return (
         <>
             <Container>
                 <Formik
                     initialValues={culto}
                     // validationSchema={}
-                    onSubmit={values => salvar(values)}
+                    onSubmit={values => cadastrarCulto(values)}
                 >
                     {({
                         values,
                         handleChange,
                         handleSubmit,
+                        setFieldValue,
                         errors,
                     }) => {
+                        function addOportunidade(){
+                            if(!values.nomePessoa || !values.momento){
+                                alert("Preencha todos os campos");
+                                return
+                            }
+                            // alert(`${values.nomePessoa}, ${values.momento}`)
+                            const oportunidade = {
+                                nomePessoa: values.nomePessoa, 
+                                momento: values.momento
+                            }
+                            // console.log(oportunidade)
+                            culto.oportunidades.push(oportunidade)
+                            // console.log(culto) 
+                        }
                         return (
                             <Form className="mt-3">
                                 {step === 1 && (
@@ -181,12 +186,13 @@ export default function Page({ params }) {
                                                 name="nomePessoa"
                                                 value={values.nomePessoa}
                                                 onChange={handleChange('nomePessoa')}
-                                                isInvalid={errors.nomePessoa}
+                                                isInvalid={!!errors.nomePessoa}
                                             />
                                             <Form.Control.Feedback type="invalid">
                                                 {errors.nomePessoa}
                                             </Form.Control.Feedback>
                                         </Form.Group>
+
                                         <Form.Group className="mb-3" controlId="momento">
                                             <Form.Label>Momento da oportunidade</Form.Label>
                                             <Form.Select
@@ -196,16 +202,20 @@ export default function Page({ params }) {
                                                 onChange={handleChange('momento')}
                                                 isInvalid={!!errors.momento}
                                             >
-                                                <option value={''}>Selecione</option>
-                                                <option value={'LOUVOR_OFERTA'}>Louvor da Oferta</option>
-                                                <option value={'LOUVOR'}>Louvor</option>
-                                                <option value={'SAUDACAO'}>Saudação</option>
-                                                <option value={'TESTEMUNHO'}>Testemunho</option>
+                                                <option value="">Selecione</option>
+                                                <option value="LOUVOR_OFERTA">Louvor da Oferta</option>
+                                                <option value="LOUVOR">Louvor</option>
+                                                <option value="SAUDACAO">Saudação</option>
+                                                <option value="TESTEMUNHO">Testemunho</option>
                                             </Form.Select>
                                             <Form.Control.Feedback type="invalid">
                                                 {errors.momento}
                                             </Form.Control.Feedback>
                                         </Form.Group>
+                                        <Button type="button" variant="success" onClick={addOportunidade}>
+                                            Adicionar Oportunidade
+                                        </Button>
+
                                     </>
                                 )}
                                 {/* Equipe Intercessão */}
