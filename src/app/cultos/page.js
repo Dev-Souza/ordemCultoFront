@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import ordemCulto from "../services/ordemCulto";
 import Spinners from "../components/Spinners";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Page() {
     const [cultos, setCultos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     // Pegando o token do localStorage
     const authToken = localStorage.getItem('authToken');
     const router = useRouter();
@@ -50,6 +50,7 @@ export default function Page() {
                     <li key={culto.id}>{culto.tituloCulto}</li> // Exibe o nome do culto
                 ))}
             </ul>
+            <Link href={"cultos/forms"} className="btn btn-success">Criar Culto</Link>
         </div>
     );
 }
