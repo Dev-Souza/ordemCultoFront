@@ -4,7 +4,7 @@ import Spinners from "@/app/components/Spinners";
 import { Formik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Container, Form, InputGroup, ProgressBar } from "react-bootstrap";
 import { FaCheck, FaAngleLeft, FaClock, FaCalendar, FaAngleRight } from "react-icons/fa";
 import DatePicker from "react-multi-date-picker";
@@ -44,6 +44,10 @@ export default function Page({ params }) {
         dataCulto: '',
         dirigente: '',
         horaProsperar: '',
+        nomePessoa: '',
+        momento: '',
+        nomeObreiro: '',
+        cargo: '',
         oportunidades: [],
         equipeIntercessao: [],
         avisos: []
@@ -72,20 +76,50 @@ export default function Page({ params }) {
                         setFieldValue,
                         errors,
                     }) => {
-                        function addOportunidade(){
-                            if(!values.nomePessoa || !values.momento){
+                        const addOportunidade = () => {
+                            // Verificar se todos os campos de uma nova oportunidade estão preenchidos
+                            if (!values.nomePessoa || !values.momento) {
                                 alert("Preencha todos os campos");
-                                return
+                                return;
                             }
-                            // alert(`${values.nomePessoa}, ${values.momento}`)
+
                             const oportunidade = {
-                                nomePessoa: values.nomePessoa, 
+                                nomePessoa: values.nomePessoa,
                                 momento: values.momento
+                            };
+                            values.oportunidades.push(oportunidade)
+                            setFieldValue('nomePessoa', '');
+                            setFieldValue('momento', '');
+                            console.log(values); // Verificar o estado atualizado
+                        };
+
+                        const removerOportunidade = (index) => {
+                            const oportunidade = values.oportunidades.filter((_, i) => i !== index);
+                            setFieldValue('oportunidades', oportunidade);
+                        };
+
+                        //Adicionar obreiro
+                        const addEquipeIntercessao = () => {
+                            if (!values.nomeObreiro || !values.cargo) {
+                                alert("Preencha todos os campos");
+                                return;
                             }
-                            // console.log(oportunidade)
-                            culto.oportunidades.push(oportunidade)
-                            // console.log(culto) 
+                            const equipe = {
+                                nomeObreiro: values.nomeObreiro,
+                                cargo: values.cargo
+                            };
+                            values.equipeIntercessao.push(equipe)
+                            setFieldValue('nomeObreiro', '');
+                            setFieldValue('cargo', '');
+                            console.log(values);
                         }
+
+                        const removerObreiro = (index) => {
+                            const equipe = values.equipeIntercessao.filter((_, i) => i !== index);
+                            setFieldValue('equipeIntercessao', equipe);
+                            console.log(values);
+                        }
+
                         return (
                             <Form className="mt-3">
                                 {step === 1 && (
@@ -215,7 +249,14 @@ export default function Page({ params }) {
                                         <Button type="button" variant="success" onClick={addOportunidade}>
                                             Adicionar Oportunidade
                                         </Button>
-
+                                        {values.oportunidades.map((oportunidade, index) => (
+                                            <div key={index} className="d-flex justify-content-between align-items-center">
+                                                <h5>{oportunidade.nomePessoa}</h5>
+                                                <Button variant="danger" onClick={() => removerOportunidade(index)}>
+                                                    Remover
+                                                </Button>
+                                            </div>
+                                        ))}
                                     </>
                                 )}
                                 {/* Equipe Intercessão */}
@@ -261,6 +302,17 @@ export default function Page({ params }) {
                                                 {errors.cargo}
                                             </Form.Control.Feedback>
                                         </Form.Group>
+                                        <Button type="button" variant="success" onClick={addEquipeIntercessao}>
+                                            Adicionar Obreiro
+                                        </Button>
+                                        {values.equipeIntercessao.map((equipe, index) => (
+                                            <div key={index} className="d-flex justify-content-between align-items-center">
+                                                <h5>{equipe.nomeObreiro}</h5>
+                                                <Button variant="danger" onClick={() => removerObreiro(index)}>
+                                                    Remover
+                                                </Button>
+                                            </div>
+                                        ))}
                                     </>
                                 )}
                                 {/* Avisos */}
