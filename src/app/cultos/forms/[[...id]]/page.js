@@ -35,7 +35,7 @@ export default function Page({ params }) {
     //Sobre a multi seleção de data
     const handleDateChange = (dates) => {
         setSelectedDates(dates);
-        setFieldValue("datasEvento", dates.map(date => date.format("YYYY-MM-DD"))); // Formato desejado
+        // setFieldValue("datasEvento", dates.map(date => date.format("YYYY-MM-DD"))); // Formato desejado
     };
 
     const culto = {
@@ -48,6 +48,10 @@ export default function Page({ params }) {
         momento: '',
         nomeObreiro: '',
         cargo: '',
+        nomeAviso: '',
+        referente: '',
+        horarioEvento: '',
+        datasEvento: [],
         oportunidades: [],
         equipeIntercessao: [],
         avisos: []
@@ -76,6 +80,7 @@ export default function Page({ params }) {
                         setFieldValue,
                         errors,
                     }) => {
+                        //Adicionar Oportunidade
                         const addOportunidade = () => {
                             // Verificar se todos os campos de uma nova oportunidade estão preenchidos
                             if (!values.nomePessoa || !values.momento) {
@@ -117,6 +122,35 @@ export default function Page({ params }) {
                         const removerObreiro = (index) => {
                             const equipe = values.equipeIntercessao.filter((_, i) => i !== index);
                             setFieldValue('equipeIntercessao', equipe);
+                            console.log(values);
+                        }
+
+                        //Adicionar Avisos
+                        const addAvisos = () => {
+                            if (!values.nomeAviso || !values.referente || !values.horarioEvento) {
+                                alert("Preencha todos os campos");
+                                return;
+                            }
+                            // Adcionando o array de datas
+                            let datasEvento = [];
+                            values.datasEvento.map((item) => {
+                                datasEvento.push(item)
+                            })
+                            const aviso = {
+                                nomeAviso: values.nomeAviso,
+                                referente: values.referente,
+                                horarioEvento: values.horarioEvento,
+                                //Datas do evento
+                                datasEvento: datasEvento
+                            };
+                            values.avisos.push(aviso)
+                            setFieldValue('nomeAviso', '');
+                            setFieldValue('referente', '');
+                            setFieldValue('horarioEvento', '');
+                            // Limpa o estado do DatePicker
+                            setSelectedDates([]);
+                            setFieldValue('datasEvento', []);
+
                             console.log(values);
                         }
 
@@ -334,7 +368,7 @@ export default function Page({ params }) {
                                             </Form.Control.Feedback>
                                         </Form.Group>
                                         <Form.Group className="mb-3" controlId="referente">
-                                            <Form.Label>Nome do aviso</Form.Label>
+                                            <Form.Label>Referente</Form.Label>
                                             <Form.Control
                                                 type="text"
                                                 placeholder="Digite o nome do aviso"
@@ -365,6 +399,7 @@ export default function Page({ params }) {
                                                 </Form.Control.Feedback>
                                             </InputGroup>
                                         </Form.Group>
+
                                         {/* Multi seleção de data */}
                                         <Form.Group className="mb-3" controlId="datasEvento">
                                             <Form.Label>Datas do Evento</Form.Label>
@@ -387,6 +422,17 @@ export default function Page({ params }) {
                                                 </Form.Control.Feedback>
                                             )}
                                         </Form.Group>
+                                        <Button type="button" variant="success" onClick={addAvisos}>
+                                            Adicionar Aviso
+                                        </Button>
+                                        {values.avisos.map((aviso, index) => (
+                                            <div key={index} className="d-flex justify-content-between align-items-center">
+                                                <h5>{aviso.nomeAviso}</h5>
+                                                <Button variant="danger" onClick={() => removerObreiro(index)}>
+                                                    Remover
+                                                </Button>
+                                            </div>
+                                        ))}
                                     </>
                                 )}
                                 <div className="d-flex justify-content-between">
