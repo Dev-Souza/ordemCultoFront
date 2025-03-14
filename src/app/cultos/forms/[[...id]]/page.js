@@ -32,24 +32,23 @@ export default function Page({ params }) {
     async function cadastrarCulto(values) {
         setLoading(true);
         try {
-            // const resposta = await ordemCulto.post('/culto', values, {
-            //     headers: {
-            //         'Authorization': `Bearer ${authToken}`,
-            //         'Content-Type': 'application/json'
-            //     }
-            // });
-            console.log(values)
+            const resposta = await ordemCulto.post('/culto', values, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             setLoading(false);
         } catch (error) {
-            // setLoading(false);
-            // if (error.response && error.response.status === 401) {
-            //     alert("Sessão expirada, por favor faça login novamente.");
-            //     router.push("/login");
-            // } else {
-            //     setError(error);
-            //     console.error(error);
-            //     router.push(<PaginaErro/>)
-            // }
+            setLoading(false);
+            if (error.response && error.response.status === 401) {
+                alert("Sessão expirada, por favor faça login novamente.");
+                router.push("/login");
+            } else {
+                setError(error);
+                console.error(error);
+                router.push(<PaginaErro/>)
+            }
         }
     }
     
