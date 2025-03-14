@@ -1,6 +1,8 @@
 'use client'
 
+import PaginaErro from "@/app/components/PaginaErro";
 import Spinners from "@/app/components/Spinners";
+import ordemCulto from "@/app/services/ordemCulto";
 import { Formik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,9 +16,8 @@ export default function Page({ params }) {
     const [error, setError] = useState(null); //login
     const [step, setStep] = useState(1); //próximo form
     const [selectedDates, setSelectedDates] = useState([]); //Multiplas datas
-
     const authToken = localStorage.getItem('authToken');
-    const route = useRouter();
+    const router = useRouter();
 
     //Próximo
     const handleNext = () => {
@@ -28,10 +29,30 @@ export default function Page({ params }) {
         setStep(step - 1);
     };
 
-    const cadastrarCulto = (values) => {
-        console.log(values)
-    };
-
+    async function cadastrarCulto(values) {
+        setLoading(true);
+        try {
+            // const resposta = await ordemCulto.post('/culto', values, {
+            //     headers: {
+            //         'Authorization': `Bearer ${authToken}`,
+            //         'Content-Type': 'application/json'
+            //     }
+            // });
+            console.log(values)
+            setLoading(false);
+        } catch (error) {
+            // setLoading(false);
+            // if (error.response && error.response.status === 401) {
+            //     alert("Sessão expirada, por favor faça login novamente.");
+            //     router.push("/login");
+            // } else {
+            //     setError(error);
+            //     console.error(error);
+            //     router.push(<PaginaErro/>)
+            // }
+        }
+    }
+    
     //Sobre a multi seleção de data
     const handleDateChange = (dates) => {
         setSelectedDates(dates);
@@ -40,7 +61,7 @@ export default function Page({ params }) {
 
     const culto = {
         tituloCulto: '',
-        tipoCulto: '',
+        tipoCulto: 'EVENTO',
         dataCulto: '',
         dirigente: '',
         horaProsperar: '',
