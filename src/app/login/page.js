@@ -18,6 +18,7 @@ export default function Page() {
             localStorage.setItem('authToken', token);
             router.push('/cultos');
         } catch (error) {
+            console.log(error)
             alert("Usuário ou senha incorretos!");
         }        
     }
