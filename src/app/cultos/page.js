@@ -21,7 +21,7 @@ export default function Page() {
                     'Authorization': `Bearer ${authToken}`  // Enviando o token no cabeçalho
                 }
             });
-            setCultos(resposta.data); // Carrega os cultos
+            setCultos(resposta.data || []); // Carrega os cultos
             setLoading(false); // Marca como carregado
         } catch (error) {
             setError(error);
