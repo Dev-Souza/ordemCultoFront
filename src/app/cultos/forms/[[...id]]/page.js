@@ -3,7 +3,7 @@
 import PaginaErro from "@/app/components/PaginaErro";
 import Spinners from "@/app/components/Spinners";
 import ordemCulto from "@/app/services/ordemCulto";
-import { Formik } from "formik";
+import { Field, FieldArray, Formik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -31,6 +31,9 @@ export default function Page({ params }) {
 
     async function cadastrarCulto(values) {
         setLoading(true);
+
+        console.log(values)
+        return;
         try {
             const resposta = await ordemCulto.post('/culto', values, {
                 headers: {
@@ -47,11 +50,11 @@ export default function Page({ params }) {
             } else {
                 setError(error);
                 console.error(error);
-                router.push(<PaginaErro/>)
+                router.push(<PaginaErro />)
             }
         }
     }
-    
+
     //Sobre a multi seleção de data
     const handleDateChange = (dates) => {
         setSelectedDates(dates);
@@ -64,17 +67,23 @@ export default function Page({ params }) {
         dataCulto: '',
         dirigente: '',
         horaProsperar: '',
-        nomePessoa: '',
-        momento: '',
-        nomeObreiro: '',
-        cargo: '',
-        nomeAviso: '',
-        referente: '',
-        horarioEvento: '',
-        datasEvento: [],
-        oportunidades: [],
-        equipeIntercessao: [],
-        avisos: []
+        oportunidades: [{
+            nomePessoa: '',
+            momentoOportunidade: '',
+            cultoId: ''
+        }],
+        equipeIntercessao: [{
+            nomeObreiro: '',
+            cargoEquipeIntercessao: '',
+            cultoId: ''
+        }],
+        avisos: [{
+            nomeAviso: '',
+            referente: '',
+            horarioEvento: '',
+            diasEvento: [],
+            cultoId: ''
+        }]
     };
 
     if (loading) {
@@ -100,79 +109,6 @@ export default function Page({ params }) {
                         setFieldValue,
                         errors,
                     }) => {
-                        //Adicionar Oportunidade
-                        const addOportunidade = () => {
-                            // Verificar se todos os campos de uma nova oportunidade estão preenchidos
-                            if (!values.nomePessoa || !values.momento) {
-                                alert("Preencha todos os campos");
-                                return;
-                            }
-
-                            const oportunidade = {
-                                nomePessoa: values.nomePessoa,
-                                momento: values.momento
-                            };
-                            values.oportunidades.push(oportunidade)
-                            setFieldValue('nomePessoa', '');
-                            setFieldValue('momento', '');
-                            console.log(values); // Verificar o estado atualizado
-                        };
-
-                        const removerOportunidade = (index) => {
-                            const oportunidade = values.oportunidades.filter((_, i) => i !== index);
-                            setFieldValue('oportunidades', oportunidade);
-                        };
-
-                        //Adicionar obreiro
-                        const addEquipeIntercessao = () => {
-                            if (!values.nomeObreiro || !values.cargo) {
-                                alert("Preencha todos os campos");
-                                return;
-                            }
-                            const equipe = {
-                                nomeObreiro: values.nomeObreiro,
-                                cargo: values.cargo
-                            };
-                            values.equipeIntercessao.push(equipe)
-                            setFieldValue('nomeObreiro', '');
-                            setFieldValue('cargo', '');
-                            console.log(values);
-                        }
-
-                        const removerObreiro = (index) => {
-                            const equipe = values.equipeIntercessao.filter((_, i) => i !== index);
-                            setFieldValue('equipeIntercessao', equipe);
-                            console.log(values);
-                        }
-
-                        //Adicionar Avisos
-                        const addAvisos = () => {
-                            if (!values.nomeAviso || !values.referente || !values.horarioEvento) {
-                                alert("Preencha todos os campos");
-                                return;
-                            }
-                            // Adcionando o array de datas
-                            let datasEvento = [];
-                            values.datasEvento.map((item) => {
-                                datasEvento.push(item)
-                            })
-                            const aviso = {
-                                nomeAviso: values.nomeAviso,
-                                referente: values.referente,
-                                horarioEvento: values.horarioEvento,
-                                //Datas do evento
-                                datasEvento: datasEvento
-                            };
-                            values.avisos.push(aviso)
-                            setFieldValue('nomeAviso', '');
-                            setFieldValue('referente', '');
-                            setFieldValue('horarioEvento', '');
-                            // Limpa o estado do DatePicker
-                            setSelectedDates([]);
-                            setFieldValue('datasEvento', []);
-
-                            console.log(values);
-                        }
 
                         return (
                             <Form className="mt-3">
@@ -266,193 +202,80 @@ export default function Page({ params }) {
                                 {step === 2 && (
                                     <>
                                         <h1>Oportunidades</h1>
-                                        <Form.Group className="mb-3" controlId="nomePessoa">
-                                            <Form.Label>Nome Pessoa</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Digite o nome da pessoa"
-                                                name="nomePessoa"
-                                                value={values.nomePessoa}
-                                                onChange={handleChange('nomePessoa')}
-                                                isInvalid={!!errors.nomePessoa}
-                                            />
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.nomePessoa}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-
-                                        <Form.Group className="mb-3" controlId="momento">
-                                            <Form.Label>Momento da oportunidade</Form.Label>
-                                            <Form.Select
-                                                aria-label="Momento da oportunidade"
-                                                name="momento"
-                                                value={values.momento}
-                                                onChange={handleChange('momento')}
-                                                isInvalid={!!errors.momento}
-                                            >
-                                                <option value="">Selecione</option>
-                                                <option value="LOUVOR_OFERTA">Louvor da Oferta</option>
-                                                <option value="LOUVOR">Louvor</option>
-                                                <option value="SAUDACAO">Saudação</option>
-                                                <option value="TESTEMUNHO">Testemunho</option>
-                                            </Form.Select>
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.momento}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Button type="button" variant="success" onClick={addOportunidade}>
-                                            Adicionar Oportunidade
-                                        </Button>
-                                        {values.oportunidades.map((oportunidade, index) => (
-                                            <div key={index} className="d-flex justify-content-between align-items-center">
-                                                <h5>{oportunidade.nomePessoa}</h5>
-                                                <Button variant="danger" onClick={() => removerOportunidade(index)}>
-                                                    Remover
-                                                </Button>
-                                            </div>
-                                        ))}
+                                        <FieldArray name="oportunidades">
+                                            {({ remove, push }) => (
+                                                <div>
+                                                    {values.oportunidades.map((_, index) => (
+                                                        <div key={index}>
+                                                            <Field name={`oportunidades[${index}].nomePessoa`} placeholder="Digite o nome da pessoa" />
+                                                            <Field as="select" name={`oportunidades[${index}].momentoOportunidade`}>
+                                                                <option value="">Selecione uma opção</option>
+                                                                <option value="LOUVOR_OFERTA">Louvor da oferta</option>
+                                                                <option value="LOUVOR">Louvor</option>
+                                                                <option value="SAUDACAO">Saudação</option>
+                                                                <option value="TESTEMUNHO">Testemunho</option>
+                                                            </Field>
+                                                            <button type="button" onClick={() => remove(index)}>Remover</button>
+                                                        </div>
+                                                    ))}
+                                                    <button type="button" onClick={() => push({ nomePessoa: '', momentoOportunidade: '' })}>Adicionar oportunidade</button>
+                                                </div>
+                                            )}
+                                        </FieldArray>
                                     </>
                                 )}
                                 {/* Equipe Intercessão */}
                                 {step === 3 && (
                                     <>
                                         <h1>Equipe Intercessão</h1>
-                                        <Form.Group className="mb-3" controlId="nomeObreiro">
-                                            <Form.Label>Nome do Intercessor</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Digite o nome do intercessor"
-                                                name="nomeObreiro"
-                                                value={values.nomeObreiro}
-                                                onChange={handleChange('nomeObreiro')}
-                                                isInvalid={errors.nomeObreiro}
-                                            />
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.nomeObreiro}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3" controlId="cargo">
-                                            <Form.Label>Cargo Eclesiástico</Form.Label>
-                                            <Form.Select
-                                                aria-label="Cargo Eclesiástico"
-                                                name="cargo"
-                                                value={values.cargo}
-                                                onChange={handleChange('cargo')}
-                                                isInvalid={!!errors.cargo}
-                                            >
-                                                <option value={''}>Selecione</option>
-                                                <option value={'OBREIRO'}>Obreiro</option>
-                                                <option value={'OBREIRA'}>Obreira</option>
-                                                <option value={'VOLUNTARIO'}>Volutario</option>
-                                                <option value={'VOLUNTARIA'}>Voluntaria</option>
-                                                <option value={'DIACONO'}>Diacono</option>
-                                                <option value={'DIACONISA'}>Diaconisa</option>
-                                                <option value={'PRESBITERO'}>Presbitero</option>
-                                                <option value={'EVANGELISTA'}>Evangelista</option>
-                                                <option value={'PASTOR'}>Pastor</option>
-                                                <option value={'PASTORA'}>Pastora</option>
-                                            </Form.Select>
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.cargo}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Button type="button" variant="success" onClick={addEquipeIntercessao}>
-                                            Adicionar Obreiro
-                                        </Button>
-                                        {values.equipeIntercessao.map((equipe, index) => (
-                                            <div key={index} className="d-flex justify-content-between align-items-center">
-                                                <h5>{equipe.nomeObreiro}</h5>
-                                                <Button variant="danger" onClick={() => removerObreiro(index)}>
-                                                    Remover
-                                                </Button>
-                                            </div>
-                                        ))}
+                                        <FieldArray name="equipeIntercessao">
+                                            {({ remove, push }) => (
+                                                <div>
+                                                    {values.equipeIntercessao.map((_, index) => (
+                                                        <div key={index}>
+                                                            <Field name={`equipeIntercessao[${index}].nomeObreiro`} />
+                                                            <Field as="select" name={`equipeIntercessao[${index}].cargoEquipeIntercessao.`} >
+                                                                <option value="">Selecione uma opção</option>
+                                                                <option value="OBREIRO"></option>
+                                                                <option value="OBREIRA"></option>
+                                                                <option value="VOLUNTARIO"></option>
+                                                                <option value="VOLUNTARIA"></option>
+                                                                <option value="DIACONO"></option>
+                                                                <option value="DIACONISA"></option>
+                                                                <option value="PRESBITERO"></option>
+                                                                <option value="EVANGELISTA"></option>
+                                                                <option value="PASTOR"></option>
+                                                                <option value="PASTORA"></option>
+                                                            </Field>
+                                                            <button type="button" onClick={() => remove(index)}>Remover</button>
+                                                        </div>
+                                                    ))}
+                                                    <button type="button" onClick={() => push({})}>Adicionar obreiro</button>
+                                                </div>
+                                            )}
+
+                                        </FieldArray>
                                     </>
                                 )}
                                 {/* Avisos */}
                                 {step === 4 && (
                                     <>
                                         <h1>Avisos</h1>
-                                        <Form.Group className="mb-3" controlId="nomeAviso">
-                                            <Form.Label>Nome do aviso</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Digite o nome do aviso"
-                                                name="nomeAviso"
-                                                value={values.nomeAviso}
-                                                onChange={handleChange('nomeAviso')}
-                                                isInvalid={errors.nomeAviso}
-                                            />
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.nomeAviso}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3" controlId="referente">
-                                            <Form.Label>Referente</Form.Label>
-                                            <Form.Control
-                                                type="text"
-                                                placeholder="Digite o nome do aviso"
-                                                name="referente"
-                                                value={values.referente}
-                                                onChange={handleChange('referente')}
-                                                isInvalid={errors.referente}
-                                            />
-                                            <Form.Control.Feedback type="invalid">
-                                                {errors.referente}
-                                            </Form.Control.Feedback>
-                                        </Form.Group>
-                                        <Form.Group className="mb-3" controlId="horarioEvento">
-                                            <Form.Label>Horário do Evento</Form.Label>
-                                            <InputGroup>
-                                                <InputGroup.Text>
-                                                    <FaClock />
-                                                </InputGroup.Text>
-                                                <Form.Control
-                                                    type="time"
-                                                    name="horarioEvento"
-                                                    value={values.horarioEvento}
-                                                    onChange={handleChange('horarioEvento')}
-                                                    isInvalid={!!errors.horarioEvento}
-                                                />
-                                                <Form.Control.Feedback type="invalid">
-                                                    {errors.horarioEvento}
-                                                </Form.Control.Feedback>
-                                            </InputGroup>
-                                        </Form.Group>
-
-                                        {/* Multi seleção de data */}
-                                        <Form.Group className="mb-3" controlId="datasEvento">
-                                            <Form.Label>Datas do Evento</Form.Label>
-                                            <InputGroup>
-                                                <InputGroup.Text>
-                                                    <FaCalendar />
-                                                </InputGroup.Text>
-                                                <DatePicker
-                                                    value={selectedDates}
-                                                    onChange={handleDateChange}
-                                                    multiple
-                                                    format="DD/MM/YYYY"
-                                                    placeholder="Selecione as datas"
-                                                    inputClass="form-control"
-                                                />
-                                            </InputGroup>
-                                            {errors.datasEvento && (
-                                                <Form.Control.Feedback type="invalid" style={{ display: "block" }}>
-                                                    {errors.datasEvento}
-                                                </Form.Control.Feedback>
+                                        <FieldArray name="avisos">
+                                            {({ remove, push }) => (
+                                                <div>
+                                                    {values.avisos.map((_, index) => (
+                                                        <div key={index}>
+                                                            <Field name={`avisos[${index}].nomeAviso`}/>
+                                                            <Field name={`avisos[${index}].referente`}/>
+                                                            <Field type="time" name={`avisos[${index}].horarioEvento`}/>
+                                                            {/* datas [] */}
+                                                            <button type="button" onClick={() => remove(index)}>Remover</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             )}
-                                        </Form.Group>
-                                        <Button type="button" variant="success" onClick={addAvisos}>
-                                            Adicionar Aviso
-                                        </Button>
-                                        {values.avisos.map((aviso, index) => (
-                                            <div key={index} className="d-flex justify-content-between align-items-center">
-                                                <h5>{aviso.nomeAviso}</h5>
-                                                <Button variant="danger" onClick={() => removerObreiro(index)}>
-                                                    Remover
-                                                </Button>
-                                            </div>
-                                        ))}
+                                        </FieldArray>
                                     </>
                                 )}
                                 <div className="d-flex justify-content-between">
