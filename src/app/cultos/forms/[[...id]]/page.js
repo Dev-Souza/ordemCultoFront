@@ -1,5 +1,6 @@
 'use client'
 
+import DatePickerField from "@/app/components/DatePickerField";
 import PaginaErro from "@/app/components/PaginaErro";
 import Spinners from "@/app/components/Spinners";
 import ordemCulto from "@/app/services/ordemCulto";
@@ -9,13 +10,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Container, Form, InputGroup, ProgressBar } from "react-bootstrap";
 import { FaCheck, FaAngleLeft, FaClock, FaCalendar, FaAngleRight } from "react-icons/fa";
-import DatePicker from "react-multi-date-picker";
 
 export default function Page({ params }) {
     const [loading, setLoading] = useState(false); //pagina carregando
     const [error, setError] = useState(null); //login
     const [step, setStep] = useState(1); //próximo form
-    const [selectedDates, setSelectedDates] = useState([]); //Multiplas datas
     const authToken = localStorage.getItem('authToken');
     const router = useRouter();
 
@@ -33,7 +32,7 @@ export default function Page({ params }) {
         setLoading(true);
 
         console.log(values)
-        return;
+        
         try {
             const resposta = await ordemCulto.post('/culto', values, {
                 headers: {
@@ -42,9 +41,11 @@ export default function Page({ params }) {
                 }
             });
             setLoading(false);
+            router.push("/cultos")
         } catch (error) {
             setLoading(false);
-            if (error.response && error.response.status === 401) {
+            console.log(error)
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                 alert("Sessão expirada, por favor faça login novamente.");
                 router.push("/login");
             } else {
@@ -54,12 +55,6 @@ export default function Page({ params }) {
             }
         }
     }
-
-    //Sobre a multi seleção de data
-    const handleDateChange = (dates) => {
-        setSelectedDates(dates);
-        // setFieldValue("datasEvento", dates.map(date => date.format("YYYY-MM-DD"))); // Formato desejado
-    };
 
     const culto = {
         tituloCulto: '',
@@ -208,7 +203,7 @@ export default function Page({ params }) {
                                                     {values.oportunidades.map((_, index) => (
                                                         <div key={index}>
                                                             <Field name={`oportunidades[${index}].nomePessoa`} placeholder="Digite o nome da pessoa" />
-                                                            <Field as="select" name={`oportunidades[${index}].momentoOportunidade`}>
+                                                            <Field as="select" name={`oportunidades[${index}].momento`}>
                                                                 <option value="">Selecione uma opção</option>
                                                                 <option value="LOUVOR_OFERTA">Louvor da oferta</option>
                                                                 <option value="LOUVOR">Louvor</option>
@@ -234,18 +229,18 @@ export default function Page({ params }) {
                                                     {values.equipeIntercessao.map((_, index) => (
                                                         <div key={index}>
                                                             <Field name={`equipeIntercessao[${index}].nomeObreiro`} />
-                                                            <Field as="select" name={`equipeIntercessao[${index}].cargoEquipeIntercessao.`} >
+                                                            <Field as="select" name={`equipeIntercessao[${index}].cargo`} >
                                                                 <option value="">Selecione uma opção</option>
-                                                                <option value="OBREIRO"></option>
-                                                                <option value="OBREIRA"></option>
-                                                                <option value="VOLUNTARIO"></option>
-                                                                <option value="VOLUNTARIA"></option>
-                                                                <option value="DIACONO"></option>
-                                                                <option value="DIACONISA"></option>
-                                                                <option value="PRESBITERO"></option>
-                                                                <option value="EVANGELISTA"></option>
-                                                                <option value="PASTOR"></option>
-                                                                <option value="PASTORA"></option>
+                                                                <option value="OBREIRO">Obreiro</option>
+                                                                <option value="OBREIRA">Obreira</option>
+                                                                <option value="VOLUNTARIO">Voluntário</option>
+                                                                <option value="VOLUNTARIA">Voluntária</option>
+                                                                <option value="DIACONO">Diácono</option>
+                                                                <option value="DIACONISA">Diaconisa</option>
+                                                                <option value="PRESBITERO">Presbítero</option>
+                                                                <option value="EVANGELISTA">Evangelista</option>
+                                                                <option value="PASTOR">Pastor</option>
+                                                                <option value="PASTORA">Pastora</option>
                                                             </Field>
                                                             <button type="button" onClick={() => remove(index)}>Remover</button>
                                                         </div>
@@ -266,13 +261,17 @@ export default function Page({ params }) {
                                                 <div>
                                                     {values.avisos.map((_, index) => (
                                                         <div key={index}>
-                                                            <Field name={`avisos[${index}].nomeAviso`}/>
-                                                            <Field name={`avisos[${index}].referente`}/>
-                                                            <Field type="time" name={`avisos[${index}].horarioEvento`}/>
-                                                            {/* datas [] */}
+                                                            <Field name={`avisos[${index}].nomeAviso`} />
+                                                            <Field name={`avisos[${index}].referente`} />
+                                                            <Field type="time" name={`avisos[${index}].horarioEvento`} />
+                                                            {/* Componente personalisado do DataPicker para se unir com formik */}
+                                                            <DatePickerField name={`avisos[${index}].diasEvento`} />
                                                             <button type="button" onClick={() => remove(index)}>Remover</button>
                                                         </div>
                                                     ))}
+                                                    <button type="button" onClick={() => push({ nomeAviso: '', referente: '', horarioEvento: '', diasEvento: [] })}>
+                                                        Adicionar Aviso
+                                                    </button>
                                                 </div>
                                             )}
                                         </FieldArray>
