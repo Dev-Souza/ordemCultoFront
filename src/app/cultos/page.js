@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ordemCulto from "../services/ordemCulto";
 import Spinners from "../components/Spinners";
 import { useRouter } from "next/navigation";
@@ -24,11 +24,12 @@ export default function Page() {
                     }
                 });
                 setCultos(resposta.data || []); // Carrega os cultos
-                setLoading(false); // Marca como carregado
             } catch (error) {
                 setError(error);
                 alert(`Sessão expirada, por favor faça login novamente.`);
                 router.push("/login");  // Redireciona para a página de login
+            } finally {
+                setLoading(false); // Marca como carregado
             }
         }
         carregarCultos();
@@ -38,16 +39,15 @@ export default function Page() {
         return <Spinners />; // Chamando o component
     }
 
-    if (error) {
-        return <p>Erro ao carregar cultos: {error}</p>; // Exibindo mensagem de erro
-    }
-
     return (
         <div>
             <h1>Cultos</h1>
             <ul>
                 {cultos.map(culto => (
-                    <li key={culto.id}>{culto.tituloCulto}</li> // Exibe o nome do culto
+                    <React.Fragment key={culto.id}>
+                        <li>{culto.tituloCulto}</li> 
+                        <Link href={`cultos/forms/${culto.id}`}>Editar</Link>
+                    </React.Fragment>
                 ))}
             </ul>
             <Link href={"cultos/forms"} className="btn btn-success">Criar Culto</Link>

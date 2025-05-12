@@ -6,17 +6,19 @@ import Spinners from "@/app/components/Spinners";
 import ordemCulto from "@/app/services/ordemCulto";
 import { Field, FieldArray, Formik } from "formik";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button, Container, Form, InputGroup, ProgressBar } from "react-bootstrap";
-import { FaCheck, FaAngleLeft, FaClock, FaCalendar, FaAngleRight } from "react-icons/fa";
+import { useParams, useRouter } from 'next/navigation';
+import { use, useEffect, useState } from "react";
+import { Button, Container, Form, ProgressBar } from "react-bootstrap";
+import { FaCheck, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 
-export default function Page({ params }) {
+export default function Page() {
     const [loading, setLoading] = useState(false); //pagina carregando
     const [error, setError] = useState(null); //login
     const [step, setStep] = useState(1); //próximo form
+    const [cultoBuscado, setCultoBuscado] = useState(null); //Culto que for buscado
     const authToken = localStorage.getItem('authToken');
     const router = useRouter();
+    const { id } = useParams() // pega o ID da URL
 
     //Próximo
     const handleNext = () => {
@@ -30,31 +32,85 @@ export default function Page({ params }) {
 
     async function cadastrarCulto(values) {
         setLoading(true);
-
-        console.log(values)
-        
-        try {
-            const resposta = await ordemCulto.post('/culto', values, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
+        // Regra para fazer o update em culto
+        if (id) {
+            try {
+                const cultoAlterado = await ordemCulto.put(`/culto/${id}`, values, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                console.log(cultoAlterado) //ATENÇÃO, tenta jogar isso no alert
+                alert('Culto alterado com sucesso!')
+                router.push("/cultos")
+            } catch (error) {
+                console.log(error)
+                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                    alert("Sessão expirada, por favor faça login novamente.");
+                    router.push("/login");
+                } else {
+                    setError(error);
+                    console.error(error);
+                    router.push(<PaginaErro />)
                 }
-            });
-            setLoading(false);
-            router.push("/cultos")
-        } catch (error) {
-            setLoading(false);
-            console.log(error)
-            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                alert("Sessão expirada, por favor faça login novamente.");
-                router.push("/login");
-            } else {
-                setError(error);
-                console.error(error);
-                router.push(<PaginaErro />)
+            } finally {
+                setLoading(false); //Marcar como carregado
+            }
+            // Fim da regra de update
+            // Regra para cadastrar culto caso não venha nenhum ID
+        } else {
+            try {
+                const resposta = await ordemCulto.post('/culto', values, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log(resposta) //ATENÇÃO, tenta jogar isso no alert
+                alert('Culto cadastrado com sucesso!')
+                router.push("/cultos")
+            } catch (error) {
+                console.log(error)
+                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                    alert("Sessão expirada, por favor faça login novamente.");
+                    router.push("/login");
+                } else {
+                    setError(error);
+                    console.error(error);
+                    router.push(<PaginaErro />)
+                }
+            } finally {
+                setLoading(false);
             }
         }
+        // Fim da regra de create
     }
+
+    // Função de verificar se aquele culto realmente existe
+    useEffect(() => {
+        async function buscarCulto() {
+            setLoading(true);
+            try {
+                // Buscando Culto
+                const response = await ordemCulto.get(`/culto/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                setCultoBuscado(response.data);
+                setLoading(false);
+            } catch (error) {
+                setError(error);
+                alert("Culto não encontrado!")
+                router.push('/cultos')
+                console.error("Culto não encontrado:", error);
+            }
+        }
+
+        buscarCulto();
+    }, [id]);
 
     const culto = {
         tituloCulto: '',
@@ -85,15 +141,11 @@ export default function Page({ params }) {
         return <Spinners />;
     }
 
-    if (error) {
-        return <p>Erro ao carregar cultos: {error}</p>;
-    }
-
     return (
         <>
             <Container>
                 <Formik
-                    initialValues={culto}
+                    initialValues={cultoBuscado || culto}
                     // validationSchema={}
                     onSubmit={values => cadastrarCulto(values)}
                 >
@@ -131,7 +183,7 @@ export default function Page({ params }) {
                                             <Form.Select
                                                 aria-label="Tipo do Culto"
                                                 name="tipoCulto"
-                                                value={values.tipoCulto}
+                                                value={values.tipoCulto || ''}
                                                 onChange={handleChange('tipoCulto')}
                                                 isInvalid={!!errors.tipoCulto}
                                             >
