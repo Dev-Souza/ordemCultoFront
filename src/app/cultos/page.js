@@ -10,27 +10,27 @@ export default function Page() {
     const [cultos, setCultos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    // Pegando o token do localStorage
-    const authToken = localStorage.getItem('authToken');
+
     const router = useRouter();
 
-    async function carregarCultos() {
-        try {
-            const resposta = await ordemCulto.get('culto', {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`  // Enviando o token no cabeçalho
-                }
-            });
-            setCultos(resposta.data || []); // Carrega os cultos
-            setLoading(false); // Marca como carregado
-        } catch (error) {
-            setError(error);
-            alert(`Sessão expirada, por favor faça login novamente.`);
-            router.push("/login");  // Redireciona para a página de login
-        }
-    }
-
     useEffect(() => {
+        // Pegando o token do localStorage
+        const authToken = localStorage.getItem('authToken');
+        async function carregarCultos() {
+            try {
+                const resposta = await ordemCulto.get('culto', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`  // Enviando o token no cabeçalho
+                    }
+                });
+                setCultos(resposta.data || []); // Carrega os cultos
+                setLoading(false); // Marca como carregado
+            } catch (error) {
+                setError(error);
+                alert(`Sessão expirada, por favor faça login novamente.`);
+                router.push("/login");  // Redireciona para a página de login
+            }
+        }
         carregarCultos();
     }, []);
 
