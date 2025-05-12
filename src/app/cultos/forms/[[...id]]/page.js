@@ -89,27 +89,29 @@ export default function Page() {
 
     // Função de verificar se aquele culto realmente existe
     useEffect(() => {
-        async function buscarCulto() {
-            setLoading(true);
-            try {
-                // Buscando Culto
-                const response = await ordemCulto.get(`/culto/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                setCultoBuscado(response.data);
-                setLoading(false);
-            } catch (error) {
-                setError(error);
-                alert("Culto não encontrado!")
-                router.push('/cultos')
-                console.error("Culto não encontrado:", error);
+        if (id) {
+            async function buscarCulto() {
+                setLoading(true);
+                try {
+                    // Buscando Culto
+                    const response = await ordemCulto.get(`/culto/${id}`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    setCultoBuscado(response.data);
+                    setLoading(false);
+                } catch (error) {
+                    setError(error);
+                    alert("Culto não encontrado!")
+                    router.push('/cultos')
+                    console.error("Culto não encontrado:", error);
+                }
             }
-        }
 
-        buscarCulto();
+            buscarCulto();
+        }
     }, [id]);
 
     const culto = {
