@@ -1,6 +1,7 @@
 'use client'
 
 import DatePickerField from "@/app/components/DatePickerField";
+import HeaderComponent from "@/app/components/cultos/HeaderComponent";
 import PaginaErro from "@/app/components/PaginaErro";
 import Spinners from "@/app/components/Spinners";
 import ordemCulto from "@/app/services/ordemCulto";
@@ -145,6 +146,7 @@ export default function Page() {
 
     return (
         <>
+            <HeaderComponent caminho="cultos"/>
             <Container>
                 <Formik
                     initialValues={cultoBuscado || culto}
