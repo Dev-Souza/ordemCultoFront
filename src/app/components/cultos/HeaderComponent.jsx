@@ -4,7 +4,7 @@ import Navbar from 'react-bootstrap/Navbar';
 
 function HeaderComponent(props) {
   return (
-    <Navbar className="bg-body-tertiary">
+    <Navbar className="bg-white py-3">
       <Container>
         <Navbar.Brand href="/cultos">MAVA</Navbar.Brand>
         <Navbar.Toggle />
