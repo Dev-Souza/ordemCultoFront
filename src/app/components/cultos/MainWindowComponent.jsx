@@ -5,7 +5,7 @@ import ordemCulto from "../../services/ordemCulto";
 import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button, Container, Modal } from "react-bootstrap";
+import { Button, Card, Col, Container, ListGroup, Modal, Row } from "react-bootstrap";
 
 export default function MainWindowComponent() {
     const [cultos, setCultos] = useState([]);
@@ -73,6 +73,7 @@ export default function MainWindowComponent() {
             });
             console.log(cultoBuscado.data)
             setModal(true) //Abrir modal
+            setCultoSelecionado(cultoBuscado.data)
         } catch (error) {
             if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                 alert("Sessão expirada, por favor faça login novamente.");
@@ -94,39 +95,69 @@ export default function MainWindowComponent() {
     }
 
     return (
-        <Container>
-            <h1>Cultos</h1>
-            <ul>
-                {cultos.map(culto => (
-                    <React.Fragment key={culto.id}>
-                        <li>{culto.tituloCulto}</li>
-                        <Link href={`cultos/forms/${culto.id}`}>Editar</Link>
-                        <button onClick={() => deletarCulto(culto.id)}>Deletar</button>
-                        <button onClick={() => verDetalhes(culto.id)}>Ver Detalhes</button>
-                        
-                        {/* Modal de ver detalhes de culto */}
-                        <Modal show={modal} onHide={handleClose}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>
-                                    {cultoSelecionado.tituloCulto}
-                                </Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <h4>Centered Modal</h4>
-                                <p>
-                                    Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-                                    dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
-                                    consectetur ac, vestibulum at eros.
-                                </p>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <Button onClick={handleClose}>Close</Button>
-                            </Modal.Footer>
-                        </Modal>
-                    </React.Fragment>
-                ))}
-            </ul>
-            <Link href={"cultos/forms"} className="btn btn-success">Criar Culto</Link>
-        </Container>
+        <section className="bg-body-tertiary" style={{ height: '100dvh', paddingTop: '100px' }}>
+            <Container>
+                <h1 className="text-center">Cultos</h1>
+                <Row>
+                    {cultos.map(culto => (
+                        <Col key={culto.id} md={4}>
+                            {/* Estrutura da page principal */}
+                            <Card>
+                                {culto.tipoCulto == 'QUINTA_RESTAURACAO' && (
+                                    <Card.Img variant="top" src="/images/quintaFeira.png" style={{width: '100%', height: '300px'}} />
+                                )}
+                                {culto.tipoCulto == 'DOMINGO_EM_FAMILIA' && (
+                                    <Card.Img variant="top" src="/images/domingo.jpg" />
+                                )}
+                                {culto.tipoCulto == 'SABADOU' && (
+                                    <Card.Img variant="top" src="holder.js/100px180" />
+                                )}
+                                {culto.tipoCulto == 'EVENTO' && (
+                                    <Card.Img variant="top" src="holder.js/100px180" />
+                                )}
+                                <Card.Body>
+                                    <Card.Title>{culto.tituloCulto}</Card.Title>
+                                    <Card.Subtitle className="mb-2 text-muted"><b>Data:</b> {new Date(culto.dataCulto).toLocaleDateString('pt-BR')}</Card.Subtitle>
+                                </Card.Body>
+                                <ListGroup className="list-group-flush">
+                                    <ListGroup.Item><b>Dirigente:</b> {culto.dirigente}</ListGroup.Item>
+                                    <ListGroup.Item><b>Hora de Prosperar:</b> {culto.horaProsperar}</ListGroup.Item>
+                                </ListGroup>
+                                <Card.Body className="d-flex gap-2">
+                                    <Link href={`cultos/forms/${culto.id}`} className="btn btn-primary">Editar</Link>
+                                    <Button variant="danger" onClick={() => deletarCulto(culto.id)}>Deletar</Button>
+                                    <Button variant="info" onClick={() => verDetalhes(culto.id)}>Ver Detalhes</Button>
+                                </Card.Body>
+                            </Card>
+
+                            {/* Modal de ver detalhes de culto */}
+                            <Modal show={modal} onHide={handleClose}>
+                                <Modal.Header closeButton>
+                                    <Modal.Title>
+                                        {cultoSelecionado.tituloCulto}
+                                    </Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <h4>Centered Modal</h4>
+                                    <p>
+                                        Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
+                                        dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
+                                        consectetur ac, vestibulum at eros.
+                                    </p>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button onClick={handleClose} className="btn btn-danger">Close</Button>
+                                </Modal.Footer>
+                            </Modal>
+                        </Col>
+                    ))}
+                </Row>
+                <div className="d-flex justify-content-end fixed-bottom p-1 p-sm-2 p-md-2 p-lg-3 p-xl-4">
+                    <Link href={"cultos/forms"} className="btn btn-success btn-lg">
+                        Criar Culto
+                    </Link>
+                </div>
+            </Container>
+        </section>
     )
 }
