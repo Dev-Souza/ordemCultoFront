@@ -13,7 +13,8 @@ export default function MainWindowComponent() {
     const [loading, setLoading] = useState(true); //Loading
     const [error, setError] = useState(null);
     const [token, setToken] = useState(null); //Token
-    const [modal, setModal] = useState(false); //Modal
+    const [modal, setModal] = useState(false); //Modal de visualização
+    const [modalAvisos, setModalAvisos] = useState(false)
     const [cultoSelecionado, setCultoSelecionado] = useState(false) //state de culto buscado
 
     const router = useRouter();
@@ -72,7 +73,6 @@ export default function MainWindowComponent() {
                     'Authorization': `Bearer ${token}`  // Enviando o token no cabeçalho
                 }
             });
-            console.log(cultoBuscado.data)
             setModal(true) //Abrir modal
             setCultoSelecionado(cultoBuscado.data)
         } catch (error) {
@@ -88,8 +88,34 @@ export default function MainWindowComponent() {
         }
     }
 
+    async function verDetalhesAvisos(id) {
+        try {
+            const cultoBuscado = await ordemCulto.get(`culto/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`  // Enviando o token no cabeçalho
+                }
+            });
+            console.log(cultoBuscado.data.avisos)
+            setModalAvisos(true) //Abrir modal Avisos
+            setCultoSelecionado(cultoBuscado.data.avisos)
+        } catch (error) {
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                alert("Sessão expirada, por favor faça login novamente.");
+                router.push("/login");
+            } else {
+                setError(error);
+                alert("Erro ao buscar culto.");
+            }
+        } finally {
+            setLoading(false); // Marca como carregado
+        }
+    }
+
     //Função de fechar modal
     const handleClose = () => setModal(false);
+
+    //Função de fechar modalAvisos
+    const handleCloseAvisos = () => setModalAvisos(false);
 
     if (loading) {
         return <Spinners />; // Chamando o component
@@ -134,28 +160,11 @@ export default function MainWindowComponent() {
                                     <Button variant="info" onClick={() => verDetalhes(culto.id)} className="d-flex align-items-center">
                                         Visualizar <FaEye className="ms-2" />
                                     </Button>
+                                    <Button variant="warning" onClick={() => verDetalhesAvisos(culto.id)} className="d-flex align-items-center">
+                                        Avisos <FaEye className="ms-2" />
+                                    </Button>
                                 </Card.Body>
                             </Card>
-
-                            {/* Modal de ver detalhes de culto */}
-                            <Modal show={modal} onHide={handleClose}>
-                                <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        {cultoSelecionado.tituloCulto}
-                                    </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body>
-                                    <h4>Centered Modal</h4>
-                                    <p>
-                                        Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-                                        dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
-                                        consectetur ac, vestibulum at eros.
-                                    </p>
-                                </Modal.Body>
-                                <Modal.Footer>
-                                    <Button onClick={handleClose} className="btn btn-danger">Close</Button>
-                                </Modal.Footer>
-                            </Modal>
                         </Col>
                     ))}
                 </Row>
@@ -165,6 +174,71 @@ export default function MainWindowComponent() {
                     </Link>
                 </div>
             </Container>
+
+
+            {/* Modal de ver detalhes de culto */}
+            <Modal show={modal} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        {cultoSelecionado.tituloCulto}
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {cultoSelecionado.tipoCulto == 'QUINTA_RESTAURACAO' && (
+                        <h3>Quinta da Restauração</h3>
+                    )}
+                    {cultoSelecionado.tipoCulto == 'DOMINGO_EM_FAMILIA' && (
+                        <h3>Domingo em Família</h3>
+                    )}
+                    {cultoSelecionado.tipoCulto == 'SABADOU' && (
+                        <h3>Sábadou</h3>
+                    )}
+                    {cultoSelecionado.tipoCulto == 'EVENTO' && (
+                        <h3>Evento</h3>
+                    )}
+                    <p>
+                        Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
+                        dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
+                        consectetur ac, vestibulum at eros.
+                    </p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={handleClose} className="btn btn-danger">Close</Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Modal de ver detalhes dos avisos */}
+            <Modal show={modalAvisos} onHide={handleCloseAvisos}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Avisos</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {Array.isArray(cultoSelecionado) ? (
+                        cultoSelecionado.map((avisos, index) => (
+                            <ListGroup className="list-group-flush" key={index}>
+                                <ListGroup.Item>
+                                    <b>Data:</b> {avisos.diasEvento?.map((dia, i) => <span key={i}>{dia} </span>)} <br />
+                                    <b>{avisos.nomeAviso}</b> <br />
+                                    <b>Horário:</b> {avisos.horarioEvento}
+                                </ListGroup.Item>
+                            </ListGroup>
+                        ))
+                    ) : cultoSelecionado ? (
+                        <ListGroup className="list-group-flush">
+                            <ListGroup.Item>
+                                <b>Data:</b> {cultoSelecionado.diasEvento?.map((dia, i) => <span key={i}>{dia} </span>)} <br />
+                                <b>{cultoSelecionado.nomeAviso}</b> <br />
+                                <b>Horário:</b> {cultoSelecionado.horarioEvento}
+                            </ListGroup.Item>
+                        </ListGroup>
+                    ) : (
+                        <p>Nenhum aviso disponível.</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={handleCloseAvisos} className="btn btn-danger">Fechar</Button>
+                </Modal.Footer>
+            </Modal>
         </section>
     )
 }
