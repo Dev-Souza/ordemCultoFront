@@ -6,6 +6,7 @@ import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Col, Container, ListGroup, Modal, Row } from "react-bootstrap";
+import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
 
 export default function MainWindowComponent() {
     const [cultos, setCultos] = useState([]);
@@ -104,7 +105,7 @@ export default function MainWindowComponent() {
                             {/* Estrutura da page principal */}
                             <Card>
                                 {culto.tipoCulto == 'QUINTA_RESTAURACAO' && (
-                                    <Card.Img variant="top" src="/images/quintaFeira.png" style={{width: '100%', height: '300px'}} />
+                                    <Card.Img variant="top" src="/images/quintaFeira.png" style={{ width: '100%', height: '300px' }} />
                                 )}
                                 {culto.tipoCulto == 'DOMINGO_EM_FAMILIA' && (
                                     <Card.Img variant="top" src="/images/domingo.jpg" />
@@ -124,9 +125,15 @@ export default function MainWindowComponent() {
                                     <ListGroup.Item><b>Hora de Prosperar:</b> {culto.horaProsperar}</ListGroup.Item>
                                 </ListGroup>
                                 <Card.Body className="d-flex gap-2">
-                                    <Link href={`cultos/forms/${culto.id}`} className="btn btn-primary">Editar</Link>
-                                    <Button variant="danger" onClick={() => deletarCulto(culto.id)}>Deletar</Button>
-                                    <Button variant="info" onClick={() => verDetalhes(culto.id)}>Ver Detalhes</Button>
+                                    <Link href={`cultos/forms/${culto.id}`} className="btn btn-primary d-flex align-items-center">
+                                        Editar <FaEdit className="ms-2" />
+                                    </Link>
+                                    <Button variant="danger" onClick={() => deletarCulto(culto.id)} className="d-flex align-items-center">
+                                        Deletar <FaTrash className="ms-2" />
+                                    </Button>
+                                    <Button variant="info" onClick={() => verDetalhes(culto.id)} className="d-flex align-items-center">
+                                        Visualizar <FaEye className="ms-2" />
+                                    </Button>
                                 </Card.Body>
                             </Card>
 
@@ -152,9 +159,9 @@ export default function MainWindowComponent() {
                         </Col>
                     ))}
                 </Row>
-                <div className="d-flex justify-content-end fixed-bottom p-1 p-sm-2 p-md-2 p-lg-3 p-xl-4">
-                    <Link href={"cultos/forms"} className="btn btn-success btn-lg">
-                        Criar Culto
+                <div className="d-flex justify-content-end fixed-bottom p-2 p-sm-2 p-md-2 p-lg-3 p-xl-4">
+                    <Link href={"cultos/forms"} className="btn btn-success btn-md">
+                        Criar Culto <FaPlus />
                     </Link>
                 </div>
             </Container>
