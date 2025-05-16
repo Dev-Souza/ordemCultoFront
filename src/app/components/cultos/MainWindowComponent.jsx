@@ -6,7 +6,7 @@ import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Col, Container, ListGroup, Modal, Row } from "react-bootstrap";
-import { FaPlus, FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaExclamationTriangle  } from 'react-icons/fa';
 
 export default function MainWindowComponent() {
     const [cultos, setCultos] = useState([]);
@@ -73,6 +73,7 @@ export default function MainWindowComponent() {
                     'Authorization': `Bearer ${token}`  // Enviando o token no cabeçalho
                 }
             });
+            console.log(cultoBuscado.data)
             setModal(true) //Abrir modal
             setCultoSelecionado(cultoBuscado.data)
         } catch (error) {
@@ -95,7 +96,6 @@ export default function MainWindowComponent() {
                     'Authorization': `Bearer ${token}`  // Enviando o token no cabeçalho
                 }
             });
-            console.log(cultoBuscado.data.avisos)
             setModalAvisos(true) //Abrir modal Avisos
             setCultoSelecionado(cultoBuscado.data.avisos)
         } catch (error) {
@@ -129,7 +129,7 @@ export default function MainWindowComponent() {
                     {cultos.map(culto => (
                         <Col key={culto.id} md={4}>
                             {/* Estrutura da page principal */}
-                            <Card>
+                            <Card className="mb-3">
                                 {culto.tipoCulto == 'QUINTA_RESTAURACAO' && (
                                     <Card.Img variant="top" src="/images/quintaFeira.png" style={{ width: '100%', height: '300px' }} />
                                 )}
@@ -150,29 +150,26 @@ export default function MainWindowComponent() {
                                     <ListGroup.Item><b>Dirigente:</b> {culto.dirigente}</ListGroup.Item>
                                     <ListGroup.Item><b>Hora de Prosperar:</b> {culto.horaProsperar}</ListGroup.Item>
                                 </ListGroup>
-                                <Card.Body className="d-flex gap-2">
-                                    <Link href={`cultos/forms/${culto.id}`} className="btn btn-primary d-flex align-items-center">
-                                        Editar <FaEdit className="ms-2" />
-                                    </Link>
-                                    <Button variant="danger" onClick={() => deletarCulto(culto.id)} className="d-flex align-items-center">
-                                        Deletar <FaTrash className="ms-2" />
-                                    </Button>
-                                    <Button variant="info" onClick={() => verDetalhes(culto.id)} className="d-flex align-items-center">
-                                        Visualizar <FaEye className="ms-2" />
-                                    </Button>
-                                    <Button variant="warning" onClick={() => verDetalhesAvisos(culto.id)} className="d-flex align-items-center">
-                                        Avisos <FaEye className="ms-2" />
-                                    </Button>
+                                <Card.Body>
+                                    <div className="d-flex flex-wrap gap-2">
+                                        <Link href={`cultos/forms/${culto.id}`} className="btn btn-primary d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                            Editar <FaEdit className="ms-2" />
+                                        </Link>
+                                        <Button variant="danger" onClick={() => deletarCulto(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                            Deletar <FaTrash className="ms-2" />
+                                        </Button>
+                                        <Button variant="info" onClick={() => verDetalhes(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                            Visualizar <FaEye className="ms-2" />
+                                        </Button>
+                                        <Button variant="warning" onClick={() => verDetalhesAvisos(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                            Avisos <FaExclamationTriangle className="ms-2"/>
+                                        </Button>
+                                    </div>
                                 </Card.Body>
                             </Card>
                         </Col>
                     ))}
                 </Row>
-                <div className="d-flex justify-content-end fixed-bottom p-2 p-sm-2 p-md-2 p-lg-3 p-xl-4">
-                    <Link href={"cultos/forms"} className="btn btn-success btn-md">
-                        Criar Culto <FaPlus />
-                    </Link>
-                </div>
             </Container>
 
 
@@ -180,27 +177,56 @@ export default function MainWindowComponent() {
             <Modal show={modal} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        {cultoSelecionado.tituloCulto}
+                        {cultoSelecionado.tituloCulto} - {new Date(cultoSelecionado.dataCulto).toLocaleDateString('pt-BR')}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {cultoSelecionado.tipoCulto == 'QUINTA_RESTAURACAO' && (
-                        <h3>Quinta da Restauração</h3>
+                    <h3>Oportunidades</h3>
+                    {Array.isArray(cultoSelecionado.oportunidades) ? (
+                        cultoSelecionado.oportunidades.map((oportunidades, index) => (
+                            <ListGroup className="list-group-flush" key={index}>
+                                <ListGroup.Item>
+                                    <b>Nome: </b> {oportunidades.nomePessoa} | 
+                                    <b> Momento: </b> 
+                                    {oportunidades.momento == 'LOUVOR_OFERTA' && (
+                                        <span>Louvor da oferta</span>
+                                    )}
+                                    {oportunidades.momento == 'LOUVOR' && (
+                                        <span>Louvor</span>
+                                    )}
+                                    {oportunidades.momento == 'SAUDACAO' && (
+                                        <span>Saudação</span>
+                                    )}
+                                    {oportunidades.momento == 'TESTEMUNHO' && (
+                                        <span>Testemunho</span>
+                                    )}
+                                    <br /> <hr />
+                                </ListGroup.Item>
+                            </ListGroup>
+                        ))
+                    ) : cultoSelecionado.oportunidades ? (
+                        <ListGroup className="list-group-flush" key={index}>
+                            <ListGroup.Item>
+                                    <b>Nome: </b> {oportunidades.nomePessoa} | 
+                                    <b> Momento: </b> 
+                                    {oportunidades.momento == 'LOUVOR_OFERTA' && (
+                                        <span>Louvor da oferta</span>
+                                    )}
+                                    {oportunidades.momento == 'LOUVOR' && (
+                                        <span>Louvor</span>
+                                    )}
+                                    {oportunidades.momento == 'SAUDACAO' && (
+                                        <span>Saudação</span>
+                                    )}
+                                    {oportunidades.momento == 'TESTEMUNHO' && (
+                                        <span>Testemunho</span>
+                                    )}
+                                    <br /> <hr />
+                                </ListGroup.Item>
+                        </ListGroup>
+                    ) : (
+                        <p>Nenhum aviso disponível.</p>
                     )}
-                    {cultoSelecionado.tipoCulto == 'DOMINGO_EM_FAMILIA' && (
-                        <h3>Domingo em Família</h3>
-                    )}
-                    {cultoSelecionado.tipoCulto == 'SABADOU' && (
-                        <h3>Sábadou</h3>
-                    )}
-                    {cultoSelecionado.tipoCulto == 'EVENTO' && (
-                        <h3>Evento</h3>
-                    )}
-                    <p>
-                        Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-                        dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
-                        consectetur ac, vestibulum at eros.
-                    </p>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={handleClose} className="btn btn-danger">Close</Button>
