@@ -1,17 +1,23 @@
 import Link from 'next/link';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
+import { FaPlus } from 'react-icons/fa';
 
 function HeaderComponent(props) {
   return (
-    <Navbar className="bg-white py-3 fixed-top" >
+    <Navbar className="bg-white py-3 fixed-top shadow-sm">
       <Container>
         <Navbar.Brand href="/cultos">MAVA</Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
-          <Navbar.Text>
-            <Link href={`/${props.caminho}`} className='btn btn-danger text-white'>Voltar</Link>
-          </Navbar.Text>
+          <div className="d-flex align-items-center gap-3">
+            <Link href="/cultos/forms" className="btn btn-success btn-md text-white d-flex align-items-center gap-2">
+              Criar Culto <FaPlus />
+            </Link>
+            <Link href={`/${props.caminho}`} className="btn btn-danger text-white">
+              Voltar
+            </Link>
+          </div>
         </Navbar.Collapse>
       </Container>
     </Navbar>
