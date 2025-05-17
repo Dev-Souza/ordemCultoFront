@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Col, Container, ListGroup, Modal, Row } from "react-bootstrap";
 import { FaEdit, FaTrash, FaEye, FaExclamationTriangle } from 'react-icons/fa';
+import Pagination from 'react-bootstrap/Pagination';
 
 export default function MainWindowComponent() {
     const [cultos, setCultos] = useState([]);
@@ -17,31 +18,58 @@ export default function MainWindowComponent() {
     const [modalAvisos, setModalAvisos] = useState(false)
     const [cultoSelecionado, setCultoSelecionado] = useState(false) //state de culto buscado
 
+    // States da paginação
+    const [pagina, setPagina] = useState(0)
+    const [itens, setItens] = useState(3) //Total itens que será exibida em cada page
+    const [totalPaginas, setTotalPaginas] = useState(1); //Total de páginas que deverão ter
+
+
     const router = useRouter();
 
     useEffect(() => {
-        // Pegando o token do localStorage
         const authToken = localStorage.getItem('authToken');
-        setToken(authToken)
+        setToken(authToken);
 
-        async function carregarCultos() {
+        async function countCultos() {
             try {
-                const resposta = await ordemCulto.get('culto', {
+                const resposta = await ordemCulto.get(`culto/qtd`, {
                     headers: {
                         'Authorization': `Bearer ${authToken}`  // Enviando o token no cabeçalho
                     }
                 });
-                setCultos(resposta.data || []); // Carrega os cultos
+                setTotalPaginas(Math.ceil(resposta.data.quantidade / itens)); //Sempre arredonda um pra cima
             } catch (error) {
                 setError(error);
                 alert(`Sessão expirada, por favor faça login novamente.`);
-                router.push("/login");  // Redireciona para a página de login
-            } finally {
-                setLoading(false); // Marca como carregado
+                router.push("/login");
             }
         }
+
+        countCultos()
+
+        async function carregarCultos() {
+            try {
+                const resposta = await ordemCulto.get('culto', {
+                    params: {
+                        pagina,
+                        itens
+                    },
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                setCultos(resposta.data || []);
+            } catch (error) {
+                setError(error);
+                alert(`Sessão expirada, por favor faça login novamente.`);
+                router.push("/login");
+            } finally {
+                setLoading(false);
+            }
+        }
+
         carregarCultos();
-    }, []);
+    }, [pagina, token]);
 
     async function deletarCulto(id) {
         try {
@@ -117,12 +145,16 @@ export default function MainWindowComponent() {
     //Função de fechar modalAvisos
     const handleCloseAvisos = () => setModalAvisos(false);
 
+    async function pagination(pag) {
+        setPagina(pag)
+    }
+
     if (loading) {
         return <Spinners />; // Chamando o component
     }
 
     return (
-        <section className="bg-body-tertiary" style={{ height: '100dvh', paddingTop: '100px' }}>
+        <section className="bg-body-tertiary" style={{ paddingTop: '100px' }}>
             <Container>
                 <h1 className="text-center">Cultos</h1>
                 <Row>
@@ -170,9 +202,34 @@ export default function MainWindowComponent() {
                         </Col>
                     ))}
                 </Row>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                    <Pagination>
+                        <Pagination.Prev
+                            onClick={() => pagina > 0 && pagination(pagina - 1)}
+                            disabled={pagina === 0}
+                        />
+                        {[...Array(totalPaginas).keys()]
+                            .filter(i => {
+                                const start = Math.max(0, pagina - 2);
+                                const end = Math.min(totalPaginas, start + 5);
+                                return i >= start && i < end;
+                            })
+                            .map(i => (
+                                <Pagination.Item
+                                    key={i}
+                                    active={i === pagina}
+                                    onClick={() => pagination(i)}
+                                >
+                                    {i + 1}
+                                </Pagination.Item>
+                            ))}
+                        <Pagination.Next
+                            onClick={() => pagina < totalPaginas - 1 && pagination(pagina + 1)}
+                            disabled={pagina === totalPaginas - 1}
+                        />
+                    </Pagination>
+                </div>
             </Container>
-
-
             {/* Modal de ver detalhes de culto */}
             <Modal show={modal} onHide={handleClose}>
                 <Modal.Header closeButton>
