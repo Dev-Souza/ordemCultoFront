@@ -5,8 +5,8 @@ import ordemCulto from "../../services/ordemCulto";
 import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button, Card, Col, Container, ListGroup, Modal, Row } from "react-bootstrap";
-import { FaEdit, FaTrash, FaEye, FaExclamationTriangle } from 'react-icons/fa';
+import { Button, Card, Col, Container, Form, ListGroup, Modal, Row } from "react-bootstrap";
+import { FaEdit, FaTrash, FaEye, FaExclamationTriangle, FaSearch, FaTimes } from 'react-icons/fa';
 import Pagination from 'react-bootstrap/Pagination';
 
 export default function MainWindowComponent() {
@@ -14,6 +14,8 @@ export default function MainWindowComponent() {
     const [loading, setLoading] = useState(true); //Loading
     const [error, setError] = useState(null);
     const [token, setToken] = useState(null); //Token
+
+    // States das modals
     const [modal, setModal] = useState(false); //Modal de visualização
     const [modalAvisos, setModalAvisos] = useState(false)
     const [cultoSelecionado, setCultoSelecionado] = useState(false) //state de culto buscado
@@ -23,6 +25,8 @@ export default function MainWindowComponent() {
     const [itens, setItens] = useState(3) //Total itens que será exibida em cada page
     const [totalPaginas, setTotalPaginas] = useState(1); //Total de páginas que deverão ter
 
+    // States de filtragem
+    const [filtroTitulo, setFiltroTitulo] = useState('');
 
     const router = useRouter();
 
@@ -49,6 +53,7 @@ export default function MainWindowComponent() {
 
         async function carregarCultos() {
             try {
+                setLoading(true)
                 const resposta = await ordemCulto.get('culto', {
                     params: {
                         pagina,
@@ -58,7 +63,7 @@ export default function MainWindowComponent() {
                         'Authorization': `Bearer ${authToken}`
                     }
                 });
-                setCultos(resposta.data || []);
+                setCultos(resposta.data);
             } catch (error) {
                 setError(error);
                 alert(`Sessão expirada, por favor faça login novamente.`);
@@ -89,8 +94,6 @@ export default function MainWindowComponent() {
                 setError(error);
                 alert("Erro ao excluir culto.");
             }
-        } finally {
-            setLoading(false); // Marca como carregado
         }
     }
 
@@ -112,8 +115,6 @@ export default function MainWindowComponent() {
                 setError(error);
                 alert("Erro ao buscar culto.");
             }
-        } finally {
-            setLoading(false); // Marca como carregado
         }
     }
 
@@ -134,8 +135,57 @@ export default function MainWindowComponent() {
                 setError(error);
                 alert("Erro ao buscar culto.");
             }
+        }
+    }
+
+    // Setando a pagina
+    async function pagination(pag) {
+        setPagina(pag)
+    }
+
+    async function buscarPorTitulo(e) {
+        e.preventDefault();
+        try {
+            setLoading(true);
+            const response = await ordemCulto.get("culto/filtroTitulo", {
+                params: { titulo: filtroTitulo }, // Aqui vão os parâmetros de busca
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setCultos(response.data); // Aqui você acessa os dados retornados
+        } catch (error) {
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                alert("Sessão expirada, por favor faça login novamente.");
+                router.push("/login");
+            } else {
+                setError(error);
+                alert("Erro ao buscar culto.");
+            }
         } finally {
-            setLoading(false); // Marca como carregado
+            setLoading(false);
+        }
+    }
+
+    async function removerFiltroTitulo() {
+        try {
+            setLoading(true)
+            const resposta = await ordemCulto.get('culto', {
+                params: {
+                    pagina,
+                    itens
+                },
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setCultos(resposta.data);
+        } catch (error) {
+            setError(error);
+            alert(`Sessão expirada, por favor faça login novamente.`);
+            router.push("/login");
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -145,10 +195,6 @@ export default function MainWindowComponent() {
     //Função de fechar modalAvisos
     const handleCloseAvisos = () => setModalAvisos(false);
 
-    async function pagination(pag) {
-        setPagina(pag)
-    }
-
     if (loading) {
         return <Spinners />; // Chamando o component
     }
@@ -157,50 +203,93 @@ export default function MainWindowComponent() {
         <section className="bg-body-tertiary" style={{ paddingTop: '100px' }}>
             <Container>
                 <h1 className="text-center">Cultos</h1>
-                <Row>
-                    {cultos.map(culto => (
-                        <Col key={culto.id} md={4}>
-                            {/* Estrutura da page principal */}
-                            <Card className="mb-3">
-                                {culto.tipoCulto == 'QUINTA_RESTAURACAO' && (
-                                    <Card.Img variant="top" src="/images/quintaFeira.png" style={{ width: '100%', height: '300px' }} />
-                                )}
-                                {culto.tipoCulto == 'DOMINGO_EM_FAMILIA' && (
-                                    <Card.Img variant="top" src="/images/domingo.jpg" />
-                                )}
-                                {culto.tipoCulto == 'SABADOU' && (
-                                    <Card.Img variant="top" src="holder.js/100px180" />
-                                )}
-                                {culto.tipoCulto == 'EVENTO' && (
-                                    <Card.Img variant="top" src="holder.js/100px180" />
-                                )}
-                                <Card.Body>
-                                    <Card.Title>{culto.tituloCulto}</Card.Title>
-                                    <Card.Subtitle className="mb-2 text-muted"><b>Data:</b> {new Date(culto.dataCulto).toLocaleDateString('pt-BR')}</Card.Subtitle>
-                                </Card.Body>
-                                <ListGroup className="list-group-flush">
-                                    <ListGroup.Item><b>Dirigente:</b> {culto.dirigente}</ListGroup.Item>
-                                    <ListGroup.Item><b>Hora de Prosperar:</b> {culto.horaProsperar}</ListGroup.Item>
-                                </ListGroup>
-                                <Card.Body>
-                                    <div className="d-flex flex-wrap gap-2">
-                                        <Link href={`cultos/forms/${culto.id}`} className="btn btn-primary d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
-                                            Editar <FaEdit className="ms-2" />
-                                        </Link>
-                                        <Button variant="danger" onClick={() => deletarCulto(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
-                                            Deletar <FaTrash className="ms-2" />
-                                        </Button>
-                                        <Button variant="info" onClick={() => verDetalhes(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
-                                            Visualizar <FaEye className="ms-2" />
-                                        </Button>
-                                        <Button variant="warning" onClick={() => verDetalhesAvisos(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
-                                            Avisos <FaExclamationTriangle className="ms-2" />
-                                        </Button>
-                                    </div>
-                                </Card.Body>
-                            </Card>
+                <Form onSubmit={buscarPorTitulo}>
+                    <Row className="mb-3 justify-content-center align-items-center">
+                        <Col md={6}>
+                            <Form.Group controlId="filtroTitulo" className="mb-0">
+                                <Form.Control
+                                    required
+                                    name="filtroTitulo"
+                                    type="text"
+                                    placeholder="Busque por título de culto"
+                                    value={filtroTitulo}
+                                    onChange={(e) => setFiltroTitulo(e.target.value)}
+                                />
+                            </Form.Group>
                         </Col>
-                    ))}
+                        <Col md="auto" className="d-flex gap-2">
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                style={{ minWidth: '56px', height: '38px' }}
+                                className="d-flex align-items-center justify-content-center"
+                            >
+                                <FaSearch />
+                            </Button>
+                            <Button
+                                onClick={removerFiltroTitulo}
+                                variant="danger"
+                                style={{ minWidth: '56px', height: '38px' }}
+                                className="d-flex align-items-center justify-content-center"
+                            >
+                                <FaTimes />
+                            </Button>
+                        </Col>
+                    </Row>
+                </Form>
+                <Row>
+                    {cultos.length === 0 ? (
+                        <Col>
+                            <div className="text-center my-5">
+                                <h5>Nenhum culto encontrado.</h5>
+                            </div>
+                        </Col>
+                    ) : (
+                        cultos.map(culto => (
+                            <Col key={culto.id} md={4}>
+                                <Card className="mb-3">
+                                    {culto.tipoCulto === 'QUINTA_RESTAURACAO' && (
+                                        <Card.Img variant="top" src="/images/quintaFeira.png" style={{ width: '100%', height: '300px' }} />
+                                    )}
+                                    {culto.tipoCulto === 'DOMINGO_EM_FAMILIA' && (
+                                        <Card.Img variant="top" src="/images/domingo.jpg" />
+                                    )}
+                                    {culto.tipoCulto === 'SABADOU' && (
+                                        <Card.Img variant="top" src="holder.js/100px180" />
+                                    )}
+                                    {culto.tipoCulto === 'EVENTO' && (
+                                        <Card.Img variant="top" src="holder.js/100px180" />
+                                    )}
+                                    <Card.Body>
+                                        <Card.Title>{culto.tituloCulto}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">
+                                            <b>Data:</b> {new Date(culto.dataCulto).toLocaleDateString('pt-BR')}
+                                        </Card.Subtitle>
+                                    </Card.Body>
+                                    <ListGroup className="list-group-flush">
+                                        <ListGroup.Item><b>Dirigente:</b> {culto.dirigente}</ListGroup.Item>
+                                        <ListGroup.Item><b>Hora de Prosperar:</b> {culto.horaProsperar}</ListGroup.Item>
+                                    </ListGroup>
+                                    <Card.Body>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            <Link href={`cultos/forms/${culto.id}`} className="btn btn-primary d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                                Editar <FaEdit className="ms-2" />
+                                            </Link>
+                                            <Button variant="danger" onClick={() => deletarCulto(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                                Deletar <FaTrash className="ms-2" />
+                                            </Button>
+                                            <Button variant="info" onClick={() => verDetalhes(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                                Visualizar <FaEye className="ms-2" />
+                                            </Button>
+                                            <Button variant="warning" onClick={() => verDetalhesAvisos(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
+                                                Avisos <FaExclamationTriangle className="ms-2" />
+                                            </Button>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))
+                    )}
                 </Row>
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                     <Pagination>
