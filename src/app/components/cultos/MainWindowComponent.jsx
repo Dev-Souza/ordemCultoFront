@@ -6,7 +6,7 @@ import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Col, Container, ListGroup, Modal, Row } from "react-bootstrap";
-import { FaEdit, FaTrash, FaEye, FaExclamationTriangle  } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaExclamationTriangle } from 'react-icons/fa';
 
 export default function MainWindowComponent() {
     const [cultos, setCultos] = useState([]);
@@ -162,7 +162,7 @@ export default function MainWindowComponent() {
                                             Visualizar <FaEye className="ms-2" />
                                         </Button>
                                         <Button variant="warning" onClick={() => verDetalhesAvisos(culto.id)} className="d-flex align-items-center justify-content-center text-center col-12 col-sm-6 col-md-auto">
-                                            Avisos <FaExclamationTriangle className="ms-2"/>
+                                            Avisos <FaExclamationTriangle className="ms-2" />
                                         </Button>
                                     </div>
                                 </Card.Body>
@@ -181,13 +181,14 @@ export default function MainWindowComponent() {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {/* Lista de avisos */}
                     <h3>Oportunidades</h3>
                     {Array.isArray(cultoSelecionado.oportunidades) ? (
                         cultoSelecionado.oportunidades.map((oportunidades, index) => (
                             <ListGroup className="list-group-flush" key={index}>
                                 <ListGroup.Item>
-                                    <b>Nome: </b> {oportunidades.nomePessoa} | 
-                                    <b> Momento: </b> 
+                                    <b>Nome: </b> {oportunidades.nomePessoa} |
+                                    <b> Momento: </b>
                                     {oportunidades.momento == 'LOUVOR_OFERTA' && (
                                         <span>Louvor da oferta</span>
                                     )}
@@ -204,28 +205,113 @@ export default function MainWindowComponent() {
                                 </ListGroup.Item>
                             </ListGroup>
                         ))
+                        // Se não for um array
                     ) : cultoSelecionado.oportunidades ? (
                         <ListGroup className="list-group-flush" key={index}>
                             <ListGroup.Item>
-                                    <b>Nome: </b> {oportunidades.nomePessoa} | 
-                                    <b> Momento: </b> 
-                                    {oportunidades.momento == 'LOUVOR_OFERTA' && (
-                                        <span>Louvor da oferta</span>
-                                    )}
-                                    {oportunidades.momento == 'LOUVOR' && (
-                                        <span>Louvor</span>
-                                    )}
-                                    {oportunidades.momento == 'SAUDACAO' && (
-                                        <span>Saudação</span>
-                                    )}
-                                    {oportunidades.momento == 'TESTEMUNHO' && (
-                                        <span>Testemunho</span>
-                                    )}
-                                    <br /> <hr />
-                                </ListGroup.Item>
+                                <b>Nome: </b> {oportunidades.nomePessoa} |
+                                <b> Momento: </b>
+                                {oportunidades.momento == 'LOUVOR_OFERTA' && (
+                                    <span>Louvor da oferta</span>
+                                )}
+                                {oportunidades.momento == 'LOUVOR' && (
+                                    <span>Louvor</span>
+                                )}
+                                {oportunidades.momento == 'SAUDACAO' && (
+                                    <span>Saudação</span>
+                                )}
+                                {oportunidades.momento == 'TESTEMUNHO' && (
+                                    <span>Testemunho</span>
+                                )}
+                                <br /> <hr />
+                            </ListGroup.Item>
                         </ListGroup>
                     ) : (
                         <p>Nenhum aviso disponível.</p>
+                    )}
+                    {/* Lista de intercessores */}
+                    <h3>Intercessão</h3>
+                    {Array.isArray(cultoSelecionado.equipeIntercessao) ? (
+                        cultoSelecionado.equipeIntercessao.map((intercessor, index) => (
+                            <ListGroup className="list-group-flush" key={index}>
+                                <ListGroup.Item>
+                                    <b>Nome: </b> {intercessor.nomeObreiro} |
+                                    <b> Cargo: </b>
+                                    {intercessor.cargo == 'OBREIRO' && (
+                                        <span>Obreiro</span>
+                                    )}
+                                    {intercessor.cargo == 'OBREIRA' && (
+                                        <span>Obreira</span>
+                                    )}
+                                    {intercessor.cargo == 'VOLUNTARIO' && (
+                                        <span>Voluntário</span>
+                                    )}
+                                    {intercessor.cargo == 'VOLUNTARIA' && (
+                                        <span>Voluntária</span>
+                                    )}
+                                    {intercessor.cargo == 'DIACONO' && (
+                                        <span>Diácono</span>
+                                    )}
+                                    {intercessor.cargo == 'DIACONISA' && (
+                                        <span>Diaconisa</span>
+                                    )}
+                                    {intercessor.cargo == 'PRESBITERO' && (
+                                        <span>Presbítero</span>
+                                    )}
+                                    {intercessor.cargo == 'EVANGELISTA' && (
+                                        <span>Evangelista</span>
+                                    )}
+                                    {intercessor.cargo == 'PASTOR' && (
+                                        <span>Pastor</span>
+                                    )}
+                                    {intercessor.cargo == 'PASTORA' && (
+                                        <span>Pastora</span>
+                                    )}
+                                    <br /> <hr />
+                                </ListGroup.Item>
+                            </ListGroup>
+                        ))
+                        // Se não for um array
+                    ) : cultoSelecionado.equipeIntercessao ? (
+                        <ListGroup className="list-group-flush" key={index}>
+                            <ListGroup.Item>
+                                <b>Nome: </b> {cultoSelecionado.equipeIntercessao.nomeObreiro} |
+                                <b> Cargo: </b>
+                                {cultoSelecionado.equipeIntercessao.cargo == 'OBREIRO' && (
+                                    <span>Obreiro</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'OBREIRA' && (
+                                    <span>Obreira</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'VOLUNTARIO' && (
+                                    <span>Voluntário</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'VOLUNTARIA' && (
+                                    <span>Voluntária</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'DIACONO' && (
+                                    <span>Diácono</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'DIACONISA' && (
+                                    <span>Diaconisa</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'PRESBITERO' && (
+                                    <span>Presbítero</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'EVANGELISTA' && (
+                                    <span>Evangelista</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'PASTOR' && (
+                                    <span>Pastor</span>
+                                )}
+                                {cultoSelecionado.equipeIntercessao.cargo == 'PASTORA' && (
+                                    <span>Pastora</span>
+                                )}
+                                <br /> <hr />
+                            </ListGroup.Item>
+                        </ListGroup>
+                    ) : (
+                        <p>Nenhum intercessor escalado.</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
@@ -243,7 +329,18 @@ export default function MainWindowComponent() {
                         cultoSelecionado.map((avisos, index) => (
                             <ListGroup className="list-group-flush" key={index}>
                                 <ListGroup.Item>
-                                    <b>Data:</b> {avisos.diasEvento?.map((dia, i) => <span key={i}>{dia} </span>)} <br />
+                                    <b>Data: </b>
+                                    {/* Formatando as multiplas datas */}
+                                    {(Array.isArray(avisos.diasEvento) ? avisos.diasEvento : [avisos.diasEvento])
+                                        .map((dia, i) => {
+                                            const data = new Date(dia);
+                                            return (
+                                                <span key={i}>
+                                                    {data.toLocaleDateString("pt-BR")}
+                                                    {i < (Array.isArray(avisos.diasEvento) ? avisos.diasEvento.length : 1) - 1 ? ", " : ""}
+                                                </span>
+                                            );
+                                        })}<br />
                                     <b>{avisos.nomeAviso}</b> <br />
                                     <b>Horário:</b> {avisos.horarioEvento}
                                 </ListGroup.Item>
