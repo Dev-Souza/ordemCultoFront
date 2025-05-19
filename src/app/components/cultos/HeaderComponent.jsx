@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
-import { FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaPlus } from 'react-icons/fa';
 
 function HeaderComponent(props) {
   return (
@@ -15,7 +15,7 @@ function HeaderComponent(props) {
               Criar Culto <FaPlus />
             </Link>
             <Link href={`/${props.caminho}`} className="btn btn-danger text-white">
-              Voltar
+              <FaArrowLeft /> Voltar
             </Link>
           </div>
         </Navbar.Collapse>

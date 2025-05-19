@@ -5,8 +5,9 @@ import ordemCulto from "../../services/ordemCulto";
 import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button, Card, Col, Container, Form, ListGroup, Modal, Row } from "react-bootstrap";
-import { FaEdit, FaTrash, FaEye, FaExclamationTriangle, FaSearch, FaTimes } from 'react-icons/fa';
+import { Button, Card, Col, Container, Dropdown, Form, ListGroup, Modal, Row } from "react-bootstrap";
+import { FaEdit, FaTrash, FaEye, FaExclamationTriangle, FaSearch, FaTimes, FaFilter, FaArrowLeft } from 'react-icons/fa';
+import { FaFilterCircleXmark } from "react-icons/fa6"; // Ícone de limpar filtro
 import Pagination from 'react-bootstrap/Pagination';
 
 export default function MainWindowComponent() {
@@ -27,6 +28,8 @@ export default function MainWindowComponent() {
 
     // States de filtragem
     const [filtroTitulo, setFiltroTitulo] = useState('');
+    const [dataInicial, setDataInicial] = useState(''); //Filtro de data
+    const [dataFim, setDataFim] = useState('');
 
     const router = useRouter();
 
@@ -147,13 +150,14 @@ export default function MainWindowComponent() {
         e.preventDefault();
         try {
             setLoading(true);
-            const response = await ordemCulto.get("culto/filtroTitulo", {
+            const cultoFiltradoPorTitulo = await ordemCulto.get("culto/filtroTitulo", {
                 params: { titulo: filtroTitulo }, // Aqui vão os parâmetros de busca
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            setCultos(response.data); // Aqui você acessa os dados retornados
+            setCultos(cultoFiltradoPorTitulo.data); // Aqui você acessa os dados retornados
+            setFiltroTitulo('');
         } catch (error) {
             if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                 alert("Sessão expirada, por favor faça login novamente.");
@@ -167,8 +171,9 @@ export default function MainWindowComponent() {
         }
     }
 
-    async function removerFiltroTitulo() {
+    async function removerFiltro(e) {
         try {
+            e.preventDefault()
             setLoading(true)
             const resposta = await ordemCulto.get('culto', {
                 params: {
@@ -180,7 +185,40 @@ export default function MainWindowComponent() {
                 }
             });
             setCultos(resposta.data);
-            setFiltroTitulo('')
+        } catch (error) {
+            setError(error);
+            console.log(error)
+            alert(`Sessão expirada, por favor faça login novamente.`);
+            router.push("/login");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function buscarPorData(e) {
+        try {
+            e.preventDefault();
+            // Validação de data
+            if (dataInicial == '' || dataFim == '') {
+                return alert(`Os campos precisam ser preenchidos!`);
+            }
+            if (dataInicial > dataFim) {
+                return alert("A data final precisa ser maior que a inicial.");
+            }
+            const cultoFiltradoPorData = await ordemCulto.post('/culto/filtroData',
+                {
+                    dataInicial: dataInicial,
+                    dataFinal: dataFim
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            setCultos(cultoFiltradoPorData.data);
+            // Zerando os campos
+            setDataInicial('');
+            setDataFim('');
         } catch (error) {
             setError(error);
             alert(`Sessão expirada, por favor faça login novamente.`);
@@ -228,7 +266,7 @@ export default function MainWindowComponent() {
                                 <FaSearch />
                             </Button>
                             <Button
-                                onClick={removerFiltroTitulo}
+                                onClick={removerFiltro}
                                 variant="danger"
                                 style={{ minWidth: '56px', height: '38px' }}
                                 className="d-flex align-items-center justify-content-center"
@@ -238,6 +276,50 @@ export default function MainWindowComponent() {
                         </Col>
                     </Row>
                 </Form>
+                <Row className="mb-3">
+                    <Col className="d-flex justify-content-end">
+                        <Dropdown align="end">
+                            <Dropdown.Toggle variant="secondary" id="dropdown-basic" className="d-flex align-items-center gap-2">
+                                <FaFilter />
+                                Filtros
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu className="p-3" style={{ minWidth: '300px' }}>
+                                <Form onSubmit={buscarPorData}>
+                                    <Form.Group controlId="dataInicial" className="mb-3">
+                                        <Form.Label>Data Inicial</Form.Label>
+                                        <Form.Control
+                                            type="date"
+                                            value={dataInicial}
+                                            onChange={(e) => setDataInicial(e.target.value)}
+                                        />
+                                    </Form.Group>
+
+                                    <Form.Group controlId="dataFim" className="mb-3">
+                                        <Form.Label>Data Final</Form.Label>
+                                        <Form.Control
+                                            type="date"
+                                            value={dataFim}
+                                            onChange={(e) => setDataFim(e.target.value)}
+                                        />
+                                    </Form.Group>
+
+                                    <Button type="submit" variant="primary" className="w-100">
+                                        Buscar
+                                    </Button>
+                                </Form>
+                            </Dropdown.Menu>
+                        </Dropdown>
+
+                        {/* Botão de limpar filtro */}
+                        <Button
+                            className="btn btn-danger d-flex align-items-center gap-2"
+                            onClick={removerFiltro}
+                        >
+                            <FaFilterCircleXmark />
+                        </Button>
+                    </Col>
+                </Row>
                 <Row>
                     {cultos.length === 0 ? (
                         <Col>
