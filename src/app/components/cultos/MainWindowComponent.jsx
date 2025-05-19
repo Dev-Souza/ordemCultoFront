@@ -180,6 +180,7 @@ export default function MainWindowComponent() {
                 }
             });
             setCultos(resposta.data);
+            setFiltroTitulo('')
         } catch (error) {
             setError(error);
             alert(`Sessão expirada, por favor faça login novamente.`);
