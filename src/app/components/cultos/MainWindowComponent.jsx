@@ -6,7 +6,7 @@ import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Col, Container, Dropdown, Form, ListGroup, Modal, Row } from "react-bootstrap";
-import { FaEdit, FaTrash, FaEye, FaExclamationTriangle, FaSearch, FaTimes, FaFilter, FaArrowLeft } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaExclamationTriangle, FaSearch, FaTimes, FaFilter } from 'react-icons/fa';
 import { FaFilterCircleXmark } from "react-icons/fa6"; // Ícone de limpar filtro
 import Pagination from 'react-bootstrap/Pagination';
 

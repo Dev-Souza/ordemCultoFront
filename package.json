@@ -12,6 +12,7 @@
     "@react-icons/all-files": "^4.1.0",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "next": "15.1.2",
     "react": "^19.0.0",
