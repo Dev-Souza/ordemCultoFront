@@ -201,7 +201,7 @@ export default function MainWindowComponent() {
     }
 
     return (
-        <section className="bg-body-tertiary" style={{ paddingTop: '100px' }}>
+        <section className="bg-body-tertiary min-vh-100" style={{ paddingTop: '100px' }}>
             <Container>
                 <h1 className="text-center">Cultos</h1>
                 <Form onSubmit={buscarPorTitulo}>
