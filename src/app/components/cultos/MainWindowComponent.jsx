@@ -243,38 +243,47 @@ export default function MainWindowComponent() {
             <Container>
                 <h1 className="text-center">Cultos</h1>
                 <Form onSubmit={buscarPorTitulo}>
-                    <Row className="mb-3 justify-content-center align-items-center">
-                        <Col md={6}>
-                            <Form.Group controlId="filtroTitulo" className="mb-0">
-                                <Form.Control
-                                    required
-                                    name="filtroTitulo"
-                                    type="text"
-                                    placeholder="Busque por título de culto"
-                                    value={filtroTitulo}
-                                    onChange={(e) => setFiltroTitulo(e.target.value)}
-                                />
-                            </Form.Group>
-                        </Col>
-                        <Col md="auto" className="d-flex gap-2">
+                    <div className="d-flex flex-wrap flex-md-nowrap justify-content-center align-items-center mb-3">
+                        <Form.Group controlId="filtroTitulo" className="mb-0 flex-grow-1" style={{ minWidth: 0 }}>
+                            <Form.Control
+                                required
+                                name="filtroTitulo"
+                                type="text"
+                                placeholder="Busque por título de culto"
+                                value={filtroTitulo}
+                                onChange={(e) => setFiltroTitulo(e.target.value)}
+                                style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+                            />
+                        </Form.Group>
+                        <div className="d-flex">
                             <Button
                                 type="submit"
                                 variant="primary"
-                                style={{ minWidth: '56px', height: '38px' }}
-                                className="d-flex align-items-center justify-content-center"
+                                style={{
+                                    minWidth: '56px',
+                                    height: '38px',
+                                    borderRadius: 0,
+                                    borderTopRightRadius: '0.375rem',
+                                }}
                             >
                                 <FaSearch />
                             </Button>
                             <Button
                                 onClick={removerFiltro}
                                 variant="danger"
-                                style={{ minWidth: '56px', height: '38px' }}
-                                className="d-flex align-items-center justify-content-center"
+                                style={{
+                                    minWidth: '56px',
+                                    height: '38px',
+                                    borderTopLeftRadius: 0,
+                                    borderBottomLeftRadius: 0,
+                                    borderTopRightRadius: '0.375rem',
+                                    marginLeft: '1px',
+                                }}
                             >
                                 <FaTimes />
                             </Button>
-                        </Col>
-                    </Row>
+                        </div>
+                    </div>
                 </Form>
                 <Row className="mb-3">
                     <Col className="d-flex justify-content-end">
