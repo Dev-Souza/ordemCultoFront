@@ -282,7 +282,7 @@ export default function Page() {
                                                                     {errors.horaProsperar}
                                                                 </Form.Control.Feedback>
                                                             </Form.Group>
-                                                            
+
                                                             {/* Preleitor */}
                                                             <Form.Group className="mb-4" controlId="preleitor">
                                                                 <Form.Label className="small fw-semibold text-uppercase text-muted d-flex align-items-center">
@@ -620,11 +620,8 @@ export default function Page() {
                                                                                                     </Form.Label>
                                                                                                     <DatePickerField
                                                                                                         name={`avisos[${index}].diasEvento`}
-                                                                                                        className="py-2"
-                                                                                                        minDate={new Date()} // Não permite datas passadas
-                                                                                                        sort // Ordena as datas selecionadas
-                                                                                                        showOtherDays // Mostra dias de outros meses
-                                                                                                        fixMainPosition="top" // Posiciona o calendário acima do input
+                                                                                                        minDate={new Date()}
+                                                                                                        maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 1))}
                                                                                                     />
                                                                                                 </Form.Group>
                                                                                             </Col>
