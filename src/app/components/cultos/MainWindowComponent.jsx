@@ -350,6 +350,7 @@ export default function MainWindowComponent() {
                                         </Card.Subtitle>
                                     </Card.Body>
                                     <ListGroup className="list-group-flush">
+                                        <ListGroup.Item><b>Preleitor: </b>{culto.preleitor}</ListGroup.Item>
                                         <ListGroup.Item><b>Dirigente:</b> {culto.dirigente}</ListGroup.Item>
                                         <ListGroup.Item><b>Hora de Prosperar:</b> {culto.horaProsperar}</ListGroup.Item>
                                     </ListGroup>
