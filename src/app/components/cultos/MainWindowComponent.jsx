@@ -331,7 +331,7 @@ export default function MainWindowComponent() {
                         cultos.map(culto => (
                             <Col key={culto.id} md={4}>
                                 <Card className="mb-3">
-                                    {culto.tipoCulto === 'QUINTA_RESTAURACAO' && (
+                                    {culto.tipoCulto === 'QUINTA_PROFETICA' && (
                                         <Card.Img variant="top" src="/images/quintaFeira.png" style={{ width: '100%', height: '300px' }} />
                                     )}
                                     {culto.tipoCulto === 'DOMINGO_EM_FAMILIA' && (
