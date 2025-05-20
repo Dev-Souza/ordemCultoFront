@@ -9,6 +9,11 @@ import { Button, Card, Col, Container, Dropdown, Form, ListGroup, Modal, Row } f
 import { FaEdit, FaTrash, FaEye, FaSearch, FaTimes, FaFilter, FaExclamationTriangle } from 'react-icons/fa';
 import { FaFilterCircleXmark } from "react-icons/fa6";
 import Pagination from 'react-bootstrap/Pagination';
+import SessaoExpirida from "../alerts/SessaoExpirada";
+import { confirmarExclusao, erroExclusao, sucessoExclusao } from "../alerts/Exclusao";
+import erroCulto from "../alerts/ErroCulto";
+import preencherCampos from "../alerts/CamposPreenchidos";
+import erroData from "../alerts/ErroData";
 
 export default function MainWindowComponent() {
     const [cultos, setCultos] = useState([]);
@@ -36,12 +41,14 @@ export default function MainWindowComponent() {
     //Function padrão para verificar sessão
     function verificaSessaoExpirada(error) {
         if (error?.response && (error.response.status === 401 || error.response.status === 403)) {
-            alert("Sessão expirada, por favor faça login novamente.");
-            router.push("/login");
+            SessaoExpirida().then(() => {
+                router.push("/login");
+            });
             return true;
         }
         return false;
     }
+
 
     //Chamando as principais functions 
     useEffect(() => {
@@ -83,16 +90,22 @@ export default function MainWindowComponent() {
     // deletando um culto
     async function deletarCulto(id) {
         try {
-            if (!confirm('Deseja realmente excluir?')) return;
+            const confirmacao = await confirmarExclusao();
+            if (!confirmacao.isConfirmed) return;
+
             await ordemCulto.delete(`culto/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
-            alert('Culto excluído com sucesso!');
-            router.push("/cultos");
+
+            // Exibe alerta de sucesso e após fechar, recarrega a página
+            sucessoExclusao("Culto", "excluído").then(() => {
+                window.location.reload();
+            });
+
         } catch (error) {
             if (verificaSessaoExpirada(error)) return;
             setError(error);
-            alert("Erro ao excluir culto.");
+            erroExclusao();
         }
     }
 
@@ -107,7 +120,7 @@ export default function MainWindowComponent() {
         } catch (error) {
             if (verificaSessaoExpirada(error)) return;
             setError(error);
-            alert("Erro ao buscar culto.");
+            erroCulto();
         }
     }
 
@@ -122,7 +135,7 @@ export default function MainWindowComponent() {
         } catch (error) {
             if (verificaSessaoExpirada(error)) return;
             setError(error);
-            alert("Erro ao buscar culto.");
+            erroCulto()
         }
     }
 
@@ -146,7 +159,7 @@ export default function MainWindowComponent() {
         } catch (error) {
             if (verificaSessaoExpirada(error)) return;
             setError(error);
-            alert("Erro ao buscar culto.");
+            erroCulto()
         } finally {
             setLoading(false);
         }
@@ -173,8 +186,8 @@ export default function MainWindowComponent() {
     // Filtro de buscar por data
     async function buscarPorData(e) {
         e.preventDefault();
-        if (!dataInicial || !dataFim) return alert("Os campos precisam ser preenchidos!");
-        if (dataInicial > dataFim) return alert("A data final precisa ser maior que a inicial.");
+        if (!dataInicial || !dataFim) return preencherCampos();
+        if (dataInicial > dataFim) return erroData();
 
         try {
             const resposta = await ordemCulto.post('/culto/filtroData',

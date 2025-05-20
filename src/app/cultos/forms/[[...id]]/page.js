@@ -12,6 +12,9 @@ import { use, useEffect, useState } from "react";
 import { Button, Container, Form, ProgressBar, Row, Col, Card, ListGroup, Badge, Alert } from "react-bootstrap";
 import { FaCheck, FaAngleLeft, FaAngleRight, FaArrowLeft, FaUsers, FaClock, FaUser, FaTrash, FaPlusCircle, FaCalendarAlt, FaUserTie, FaBullhorn, FaInfoCircle, FaCalendarCheck, FaCalendarDay, FaBell, FaChurch, FaHeading, FaListAlt, FaMicrophone } from "react-icons/fa";
 import { FaHandsPraying } from "react-icons/fa6";
+import { showSuccess } from "@/app/components/alerts/Success";
+import erroCulto from "@/app/components/alerts/ErroCulto";
+import SessaoExpirida from "@/app/components/alerts/SessaoExpirada";
 
 
 export default function Page() {
@@ -19,79 +22,14 @@ export default function Page() {
     const [error, setError] = useState(null); //login
     const [step, setStep] = useState(1); //próximo form
     const [cultoBuscado, setCultoBuscado] = useState(null); //Culto que for buscado
-    const authToken = localStorage.getItem('authToken');
+    const [token, setToken] = useState('');
     const router = useRouter();
     const { id } = useParams() // pega o ID da URL
 
-    //Próximo
-    const handleNext = () => {
-        setStep(step + 1);
-    };
-
-    //Anterior
-    const handlePrevious = () => {
-        setStep(step - 1);
-    };
-
-    async function cadastrarCulto(values) {
-        setLoading(true);
-        // Regra para fazer o update em culto
-        if (id) {
-            try {
-                const cultoAlterado = await ordemCulto.put(`/culto/${id}`, values, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                console.log(cultoAlterado) //ATENÇÃO, tenta jogar isso no alert
-                alert('Culto alterado com sucesso!')
-                router.push("/cultos")
-            } catch (error) {
-                console.log(error)
-                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                    alert("Sessão expirada, por favor faça login novamente.");
-                    router.push("/login");
-                } else {
-                    setError(error);
-                    console.error(error);
-                    router.push(<PaginaErro />)
-                }
-            } finally {
-                setLoading(false); //Marcar como carregado
-            }
-            // Fim da regra de update
-            // Regra para cadastrar culto caso não venha nenhum ID
-        } else {
-            try {
-                const resposta = await ordemCulto.post('/culto', values, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                console.log(resposta) //ATENÇÃO, tenta jogar isso no alert
-                alert('Culto cadastrado com sucesso!')
-                router.push("/cultos")
-            } catch (error) {
-                console.log(error)
-                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                    alert("Sessão expirada, por favor faça login novamente.");
-                    router.push("/login");
-                } else {
-                    setError(error);
-                    console.error(error);
-                    router.push(<PaginaErro />)
-                }
-            } finally {
-                setLoading(false);
-            }
-        }
-        // Fim da regra de create
-    }
-
     // Função de verificar se aquele culto realmente existe
     useEffect(() => {
+        const authToken = localStorage.getItem('authToken');
+        setToken(authToken)
         if (id) {
             async function buscarCulto() {
                 setLoading(true);
@@ -107,15 +45,68 @@ export default function Page() {
                     setLoading(false);
                 } catch (error) {
                     setError(error);
-                    alert("Culto não encontrado!")
+                    erroCulto()
                     router.push('/cultos')
-                    console.error("Culto não encontrado:", error);
                 }
             }
 
             buscarCulto();
         }
     }, [id]);
+
+    //Próximo
+    const handleNext = () => {
+        setStep(step + 1);
+    };
+
+    //Anterior
+    const handlePrevious = () => {
+        setStep(step - 1);
+    };
+
+    //Function padrão para verificar sessão
+    function verificaSessaoExpirada(error) {
+        if (error?.response && (error.response.status === 401 || error.response.status === 403)) {
+            SessaoExpirida().then(() => {
+                router.push("/login");
+            });
+            return true;
+        }
+        return false;
+    }
+
+    async function cadastrarCulto(values) {
+        setLoading(true);
+        try {
+            if (id) {
+                // Atualizar culto
+                await ordemCulto.put(`/culto/${id}`, values, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                showSuccess("Culto", "alterado");
+            } else {
+                // Cadastrar culto
+                await ordemCulto.post('/culto', values, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                showSuccess("Culto", "cadastrado");
+            }
+
+            router.push("/cultos");
+
+        } catch (error) {
+            if (verificaSessaoExpirada(error)) return; // já redireciona dentro da função
+            setError(error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const culto = {
         tituloCulto: '',
