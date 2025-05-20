@@ -6,33 +6,44 @@ import Spinners from "../../components/Spinners";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Col, Container, Dropdown, Form, ListGroup, Modal, Row } from "react-bootstrap";
-import { FaEdit, FaTrash, FaEye, FaExclamationTriangle, FaSearch, FaTimes, FaFilter } from 'react-icons/fa';
-import { FaFilterCircleXmark } from "react-icons/fa6"; // Ícone de limpar filtro
+import { FaEdit, FaTrash, FaEye, FaSearch, FaTimes, FaFilter, FaExclamationTriangle } from 'react-icons/fa';
+import { FaFilterCircleXmark } from "react-icons/fa6";
 import Pagination from 'react-bootstrap/Pagination';
 
 export default function MainWindowComponent() {
     const [cultos, setCultos] = useState([]);
-    const [loading, setLoading] = useState(true); //Loading
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [token, setToken] = useState(null); //Token
+    const [token, setToken] = useState(null);
 
-    // States das modals
-    const [modal, setModal] = useState(false); //Modal de visualização
-    const [modalAvisos, setModalAvisos] = useState(false)
-    const [cultoSelecionado, setCultoSelecionado] = useState(false) //state de culto buscado
+    // States da modal
+    const [modal, setModal] = useState(false);
+    const [modalAvisos, setModalAvisos] = useState(false);
+    const [cultoSelecionado, setCultoSelecionado] = useState(false);
 
-    // States da paginação
-    const [pagina, setPagina] = useState(0)
-    const [itens, setItens] = useState(3) //Total itens que será exibida em cada page
-    const [totalPaginas, setTotalPaginas] = useState(1); //Total de páginas que deverão ter
+    // States da pagination
+    const [pagina, setPagina] = useState(0);
+    const [itens, setItens] = useState(3);
+    const [totalPaginas, setTotalPaginas] = useState(1);
 
-    // States de filtragem
+    // States de filtro
     const [filtroTitulo, setFiltroTitulo] = useState('');
-    const [dataInicial, setDataInicial] = useState(''); //Filtro de data
+    const [dataInicial, setDataInicial] = useState('');
     const [dataFim, setDataFim] = useState('');
 
     const router = useRouter();
 
+    //Function padrão para verificar sessão
+    function verificaSessaoExpirada(error) {
+        if (error?.response && (error.response.status === 401 || error.response.status === 403)) {
+            alert("Sessão expirada, por favor faça login novamente.");
+            router.push("/login");
+            return true;
+        }
+        return false;
+    }
+
+    //Chamando as principais functions 
     useEffect(() => {
         const authToken = localStorage.getItem('authToken');
         setToken(authToken);
@@ -40,203 +51,152 @@ export default function MainWindowComponent() {
         async function countCultos() {
             try {
                 const resposta = await ordemCulto.get(`culto/qtd`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`  // Enviando o token no cabeçalho
-                    }
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
-                setTotalPaginas(Math.ceil(resposta.data.quantidade / itens)); //Sempre arredonda um pra cima
+                setTotalPaginas(Math.ceil(resposta.data.quantidade / itens));
             } catch (error) {
+                if (verificaSessaoExpirada(error)) return;
                 setError(error);
-                alert(`Sessão expirada, por favor faça login novamente.`);
-                router.push("/login");
             }
         }
 
-        countCultos()
-
         async function carregarCultos() {
             try {
-                setLoading(true)
+                setLoading(true);
                 const resposta = await ordemCulto.get('culto', {
-                    params: {
-                        pagina,
-                        itens
-                    },
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
+                    params: { pagina, itens },
+                    headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 setCultos(resposta.data);
             } catch (error) {
+                if (verificaSessaoExpirada(error)) return;
                 setError(error);
-                alert(`Sessão expirada, por favor faça login novamente.`);
-                router.push("/login");
             } finally {
                 setLoading(false);
             }
         }
 
+        countCultos();
         carregarCultos();
-    }, [pagina, token]);
+    }, [pagina]);
 
+    // deletando um culto
     async function deletarCulto(id) {
         try {
             if (!confirm('Deseja realmente excluir?')) return;
-            const resposta = await ordemCulto.delete(`culto/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`  // Enviando o token no cabeçalho
-                }
+            await ordemCulto.delete(`culto/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            alert('Culto excluído com sucesso!')
-            router.push("/cultos")
+            alert('Culto excluído com sucesso!');
+            router.push("/cultos");
         } catch (error) {
-            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                alert("Sessão expirada, por favor faça login novamente.");
-                router.push("/login");
-            } else {
-                setError(error);
-                alert("Erro ao excluir culto.");
-            }
+            if (verificaSessaoExpirada(error)) return;
+            setError(error);
+            alert("Erro ao excluir culto.");
         }
     }
 
+    // Ver detalhes
     async function verDetalhes(id) {
         try {
-            const cultoBuscado = await ordemCulto.get(`culto/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`  // Enviando o token no cabeçalho
-                }
+            const resposta = await ordemCulto.get(`culto/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            console.log(cultoBuscado.data)
-            setModal(true) //Abrir modal
-            setCultoSelecionado(cultoBuscado.data)
+            setModal(true);
+            setCultoSelecionado(resposta.data);
         } catch (error) {
-            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                alert("Sessão expirada, por favor faça login novamente.");
-                router.push("/login");
-            } else {
-                setError(error);
-                alert("Erro ao buscar culto.");
-            }
+            if (verificaSessaoExpirada(error)) return;
+            setError(error);
+            alert("Erro ao buscar culto.");
         }
     }
 
+    // ver detalhes de avisos
     async function verDetalhesAvisos(id) {
         try {
-            const cultoBuscado = await ordemCulto.get(`culto/${id}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`  // Enviando o token no cabeçalho
-                }
+            const resposta = await ordemCulto.get(`culto/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            setModalAvisos(true) //Abrir modal Avisos
-            setCultoSelecionado(cultoBuscado.data.avisos)
+            setModalAvisos(true);
+            setCultoSelecionado(resposta.data.avisos);
         } catch (error) {
-            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                alert("Sessão expirada, por favor faça login novamente.");
-                router.push("/login");
-            } else {
-                setError(error);
-                alert("Erro ao buscar culto.");
-            }
+            if (verificaSessaoExpirada(error)) return;
+            setError(error);
+            alert("Erro ao buscar culto.");
         }
     }
 
-    // Setando a pagina
-    async function pagination(pag) {
-        setPagina(pag)
+
+    // Setando a página da pagination
+    function pagination(pag) {
+        setPagina(pag);
     }
 
+    // FIltro de buscar por titulo
     async function buscarPorTitulo(e) {
         e.preventDefault();
         try {
             setLoading(true);
-            const cultoFiltradoPorTitulo = await ordemCulto.get("culto/filtroTitulo", {
-                params: { titulo: filtroTitulo }, // Aqui vão os parâmetros de busca
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const resposta = await ordemCulto.get("culto/filtroTitulo", {
+                params: { titulo: filtroTitulo },
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-            setCultos(cultoFiltradoPorTitulo.data); // Aqui você acessa os dados retornados
+            setCultos(resposta.data);
             setFiltroTitulo('');
         } catch (error) {
-            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                alert("Sessão expirada, por favor faça login novamente.");
-                router.push("/login");
-            } else {
-                setError(error);
-                alert("Erro ao buscar culto.");
-            }
+            if (verificaSessaoExpirada(error)) return;
+            setError(error);
+            alert("Erro ao buscar culto.");
         } finally {
             setLoading(false);
         }
     }
 
+    // Remover filtro
     async function removerFiltro(e) {
+        e.preventDefault();
         try {
-            e.preventDefault()
-            setLoading(true)
+            setLoading(true);
             const resposta = await ordemCulto.get('culto', {
-                params: {
-                    pagina,
-                    itens
-                },
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                params: { pagina, itens },
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             setCultos(resposta.data);
         } catch (error) {
+            if (verificaSessaoExpirada(error)) return;
             setError(error);
-            console.log(error)
-            alert(`Sessão expirada, por favor faça login novamente.`);
-            router.push("/login");
         } finally {
             setLoading(false);
         }
     }
 
+    // Filtro de buscar por data
     async function buscarPorData(e) {
+        e.preventDefault();
+        if (!dataInicial || !dataFim) return alert("Os campos precisam ser preenchidos!");
+        if (dataInicial > dataFim) return alert("A data final precisa ser maior que a inicial.");
+
         try {
-            e.preventDefault();
-            // Validação de data
-            if (dataInicial == '' || dataFim == '') {
-                return alert(`Os campos precisam ser preenchidos!`);
-            }
-            if (dataInicial > dataFim) {
-                return alert("A data final precisa ser maior que a inicial.");
-            }
-            const cultoFiltradoPorData = await ordemCulto.post('/culto/filtroData',
-                {
-                    dataInicial: dataInicial,
-                    dataFinal: dataFim
-                },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-            setCultos(cultoFiltradoPorData.data);
-            // Zerando os campos
+            const resposta = await ordemCulto.post('/culto/filtroData',
+                { dataInicial, dataFinal: dataFim },
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            setCultos(resposta.data);
             setDataInicial('');
             setDataFim('');
         } catch (error) {
+            if (verificaSessaoExpirada(error)) return;
             setError(error);
-            alert(`Sessão expirada, por favor faça login novamente.`);
-            router.push("/login");
         } finally {
             setLoading(false);
         }
     }
 
-    //Função de fechar modal
+    // Fechando as modais
     const handleClose = () => setModal(false);
-
-    //Função de fechar modalAvisos
     const handleCloseAvisos = () => setModalAvisos(false);
 
-    if (loading) {
-        return <Spinners />; // Chamando o component
-    }
+    if (loading) return <Spinners />;
 
     return (
         <section className="bg-body-tertiary min-vh-100" style={{ paddingTop: '100px' }}>
