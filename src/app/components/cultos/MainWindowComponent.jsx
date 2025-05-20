@@ -544,7 +544,7 @@ export default function MainWindowComponent() {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={handleClose} className="btn btn-danger">Close</Button>
+                    <Button onClick={handleClose} className="btn btn-danger">Fechar</Button>
                 </Modal.Footer>
             </Modal>
 
