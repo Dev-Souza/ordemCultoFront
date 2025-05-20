@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useParams, useRouter } from 'next/navigation';
 import { use, useEffect, useState } from "react";
 import { Button, Container, Form, ProgressBar, Row, Col, Card, ListGroup, Badge, Alert } from "react-bootstrap";
-import { FaCheck, FaAngleLeft, FaAngleRight, FaArrowLeft, FaUsers, FaClock, FaUser, FaMusic, FaSmile, FaHeart, FaTrash, FaPlusCircle, FaCalendarAlt, FaUserTie, FaBullhorn, FaInfoCircle, FaCalendarCheck, FaCalendarDay, FaBell, FaChurch, FaHeading, FaListAlt } from "react-icons/fa";
+import { FaCheck, FaAngleLeft, FaAngleRight, FaArrowLeft, FaUsers, FaClock, FaUser, FaTrash, FaPlusCircle, FaCalendarAlt, FaUserTie, FaBullhorn, FaInfoCircle, FaCalendarCheck, FaCalendarDay, FaBell, FaChurch, FaHeading, FaListAlt, FaMicrophone } from "react-icons/fa";
 import { FaHandsPraying } from "react-icons/fa6";
 
 
@@ -123,6 +123,7 @@ export default function Page() {
         dataCulto: '',
         dirigente: '',
         horaProsperar: '',
+        preleitor: '',
         oportunidades: [{
             nomePessoa: '',
             momentoOportunidade: '',
@@ -213,7 +214,7 @@ export default function Page() {
                                                                     className="py-2"
                                                                 >
                                                                     <option value={''}>Selecione o tipo de culto...</option>
-                                                                    <option value={'QUINTA_RESTAURACAO'}>Quinta Restauração</option>
+                                                                    <option value={'QUINTA_PROFETICA'}>Quinta Profética</option>
                                                                     <option value={'DOMINGO_EM_FAMILIA'}>Domingo em Família</option>
                                                                     <option value={'SABADOU'}>Sabadou</option>
                                                                     <option value={'EVENTO'}>Evento</option>
@@ -279,6 +280,26 @@ export default function Page() {
                                                                 />
                                                                 <Form.Control.Feedback type="invalid">
                                                                     {errors.horaProsperar}
+                                                                </Form.Control.Feedback>
+                                                            </Form.Group>
+                                                            
+                                                            {/* Preleitor */}
+                                                            <Form.Group className="mb-4" controlId="preleitor">
+                                                                <Form.Label className="small fw-semibold text-uppercase text-muted d-flex align-items-center">
+                                                                    <FaMicrophone className="me-2" size={12} />
+                                                                    Preleitor
+                                                                </Form.Label>
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    placeholder="Digite o nome do preleitor"
+                                                                    name="preleitor"
+                                                                    value={values.preleitor}
+                                                                    onChange={handleChange('preleitor')}
+                                                                    isInvalid={errors.preleitor}
+                                                                    className="py-2"
+                                                                />
+                                                                <Form.Control.Feedback type="invalid">
+                                                                    {errors.preleitor}
                                                                 </Form.Control.Feedback>
                                                             </Form.Group>
                                                         </Card.Body>
