@@ -209,6 +209,14 @@ export default function MainWindowComponent() {
     const handleClose = () => setModal(false);
     const handleCloseAvisos = () => setModalAvisos(false);
 
+    //Formatando Data
+    function formatarDataLocal(dataISO) {
+        if (!dataISO) return '';
+        const [ano, mes, dia] = dataISO.split('T')[0].split('-');
+        const data = new Date(ano, mes - 1, dia);
+        return data.toLocaleDateString('pt-BR');
+    }
+
     if (loading) return <Spinners />;
 
     return (
@@ -310,7 +318,9 @@ export default function MainWindowComponent() {
                             </div>
                         </Col>
                     ) : (
-                        cultos.map(culto => (
+                        cultos
+                        .sort((a, b) => new Date(b.dataCulto) - new Date(a.dataCulto))
+                        .map(culto => (
                             <Col key={culto.id} md={4}>
                                 <Card className="mb-3">
                                     {culto.tipoCulto === 'QUINTA_PROFETICA' && (
@@ -328,7 +338,7 @@ export default function MainWindowComponent() {
                                     <Card.Body>
                                         <Card.Title>{culto.tituloCulto}</Card.Title>
                                         <Card.Subtitle className="mb-2 text-muted">
-                                            <b>Data:</b> {new Date(culto.dataCulto).toLocaleDateString('pt-BR')}
+                                            <b>Data:</b> {formatarDataLocal(culto.dataCulto)}
                                         </Card.Subtitle>
                                     </Card.Body>
                                     <ListGroup className="list-group-flush">
