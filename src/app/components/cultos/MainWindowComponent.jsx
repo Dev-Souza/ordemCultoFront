@@ -324,16 +324,16 @@ export default function MainWindowComponent() {
                             <Col key={culto.id} md={4}>
                                 <Card className="mb-3">
                                     {culto.tipoCulto === 'QUINTA_PROFETICA' && (
-                                        <Card.Img variant="top" src="/images/quintaFeira.png" style={{ width: '100%', height: '300px' }} />
+                                        <Card.Img variant="top" src="/images/quintaProfetica.jpeg" style={{ width: '100%', height: '300px' }} />
                                     )}
                                     {culto.tipoCulto === 'DOMINGO_EM_FAMILIA' && (
-                                        <Card.Img variant="top" src="/images/domingo.jpg" />
+                                        <Card.Img variant="top" src="/images/domingoEmFamilia.jpeg" style={{ width: '100%', height: '300px' }} />
                                     )}
                                     {culto.tipoCulto === 'SABADOU' && (
-                                        <Card.Img variant="top" src="holder.js/100px180" />
+                                        <Card.Img variant="top" src="/images/vigiliaEkballo.jpeg" style={{ width: '100%', height: '300px' }}/>
                                     )}
                                     {culto.tipoCulto === 'EVENTO' && (
-                                        <Card.Img variant="top" src="holder.js/100px180" />
+                                        <Card.Img variant="top" src="/images/mavaEventos.jpeg" style={{ width: '100%', height: '300px' }}/>
                                     )}
                                     <Card.Body>
                                         <Card.Title>{culto.tituloCulto}</Card.Title>
