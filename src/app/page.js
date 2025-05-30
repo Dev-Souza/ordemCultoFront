@@ -1,95 +1,108 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import { Formik } from "formik";
+import Link from "next/link";
+import { Button, Card, Form, Container, Row, Col } from "react-bootstrap";
+import { FaCheck, FaUser, FaLock, FaUserPlus } from 'react-icons/fa';
+import ordemCulto from "./services/ordemCulto";
+import { useRouter } from "next/navigation";
+import HeaderLoginComponent from "./components/login/HeaderLoginComponent";
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+export default function Page() {
+    const router = useRouter();
+
+    async function autenticar(values) {
+        try {
+            const resultado = await ordemCulto.post('auth/login', values);
+            const resposta = resultado.data;
+            const token = resposta.token;
+            localStorage.setItem('authToken', token);
+            router.push('/cultos');
+        } catch (error) {
+            console.log(error);
+            alert("Usuário ou senha incorretos!");
+        }
+    }
+
+    return (
+        <>
+            <HeaderLoginComponent />
+            <div style={{
+                height: '100dvh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(to right,rgb(19, 14, 11),rgb(153, 102, 45),rgb(189, 172, 154))',
+                overflow: 'hidden',
+            }}>
+
+                <Card style={{ width: '100%', maxWidth: '400px' }} className="p-4 shadow-lg">
+                    <h3 className="text-center mb-4 text-primary">Acesso ao Sistema</h3>
+                    <Formik
+                        initialValues={{ login: '', password: '' }}
+                        onSubmit={values => autenticar(values)}
+                    >
+                        {({
+                            values,
+                            handleChange,
+                            handleSubmit,
+                            errors,
+                            touched
+                        }) => (
+                            <Form onSubmit={handleSubmit}>
+                                <Form.Group className="mb-3" controlId="login">
+                                    <Form.Label>
+                                        <FaUser className="me-2" /> Usuário
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Digite seu usuário"
+                                        name="login"
+                                        value={values.login}
+                                        onChange={handleChange}
+                                        className="shadow-sm"
+                                        isInvalid={touched.login && !!errors.login}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.login}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Form.Group className="mb-4" controlId="password">
+                                    <Form.Label>
+                                        <FaLock className="me-2" /> Senha
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="password"
+                                        placeholder="Digite sua senha"
+                                        name="password"
+                                        value={values.password}
+                                        onChange={handleChange}
+                                        className="shadow-sm"
+                                        isInvalid={touched.password && !!errors.password}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.password}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Button
+                                    type="submit"
+                                    variant="primary"
+                                    className="w-100 d-flex align-items-center justify-content-center mb-2"
+                                >
+                                    <FaCheck className="me-2" /> Login
+                                </Button>
+                                <div className="text-center">
+                                    <Link href="/users/register" passHref>
+                                        <Button variant="link" className="text-white-50 text-decoration-none">
+                                            <FaUserPlus className="me-1" /> Não é cadastrado? Cadastre-se
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </Form>
+                        )}
+                    </Formik>
+                </Card>
+            </div>
+        </>
+    );
 }
