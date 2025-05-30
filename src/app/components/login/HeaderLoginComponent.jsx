@@ -6,7 +6,7 @@ export default function HeaderLoginComponent() {
             <Navbar className="bg-white py-3">
                 <Container>
                     <Navbar.Brand href="/login">
-                        MAVA
+                        <img src="/images/Logo.png" style={{height: 50, width: '100%'}}/>
                     </Navbar.Brand>
                 </Container>
             </Navbar>

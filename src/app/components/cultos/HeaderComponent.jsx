@@ -7,7 +7,9 @@ function HeaderComponent(props) {
   return (
     <Navbar className="bg-white py-3 fixed-top shadow-sm">
       <Container>
-        <Navbar.Brand href="/cultos">MAVA</Navbar.Brand>
+        <Navbar.Brand href="/cultos">
+          <img src='/images/Logo.png' style={{height: 50}}/>
+        </Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <div className="d-flex align-items-center gap-3">
