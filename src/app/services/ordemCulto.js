@@ -1,7 +1,7 @@
 const { default: axios } = require("axios");
 
 const ordemCulto = axios.create({
-    baseURL: import.meta.env.CHAVE_API
+    baseURL: import.meta.env.VITE_API_URL
 })
 
 export default ordemCulto
