@@ -1,7 +1,7 @@
-const { default: axios } = require("axios");
+import axios from "axios";
 
 const ordemCulto = axios.create({
-    baseURL: import.meta.env.VITE_API_URL
-})
+    baseURL: 'https://ordemculto.onrender.com'
+});
 
-export default ordemCulto
+export default ordemCulto;
